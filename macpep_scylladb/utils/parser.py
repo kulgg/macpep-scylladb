@@ -1,11 +1,26 @@
+import re
 from typing import List
 
+ID_REGEX = re.compile("ID   (\w+).*", re.MULTILINE)
+ACCESSION_LINES_REGEX = re.compile("AC   .*", re.MULTILINE)
+ACCESSIONS_REGEX = re.compile("(\w+);\s?")
+SEQUENCE_LINES_REGEX = re.compile("^     \w+.*", re.MULTILINE)
+SEQUENCE_REGEX = re.compile("(\w+)\s?")
 
 def get_id(txt: str) -> str:
-    return txt
+    match = ID_REGEX.match(txt)
+    return match.group(1)
 
 def get_accessions(txt: str) -> List[str]:
-    return txt
+    accessions = []
+    ac_lines = ACCESSION_LINES_REGEX.findall(txt)
+    for line in ac_lines:
+        accessions.extend(ACCESSIONS_REGEX.findall(line))
+    return accessions
 
 def get_sequence(txt: str) -> str:
-    return txt
+    sequence = ""
+    for line in SEQUENCE_LINES_REGEX.findall(txt):
+        for sequence_part in SEQUENCE_REGEX.findall(line):
+            sequence = f"{sequence}{sequence_part}"
+    return sequence
