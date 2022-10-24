@@ -6,9 +6,13 @@ authors = ["kulgg <75735874+kulgg@users.noreply.github.com>"]
 readme = "README.md"
 packages = [{include = "macpep_scylladb"}]
 
+[tool.poetry.scripts]
+x = "macpep_scylladb.__main__:main"
+
 [tool.poetry.dependencies]
 python = "^3.10"
-
+fire = "^0.4.0"
+exitstatus = "^2.2.0"
 
 [build-system]
 requires = ["poetry-core"]
