@@ -1,386 +1,231 @@
 from cmath import exp
-from macpep_scylladb.utils.parser import get_id
+from macpep_scylladb.utils.parser import get_accessions, get_id
 
 
-protein_txt = """ID   AUTS2_MOUSE             Reviewed;        1261 AA.
-AC   A0A087WPF7; E9PWJ4; Q6ZQB3; Q8BWI6;
-DT   25-OCT-2017, integrated into UniProtKB/Swiss-Prot.
-DT   25-OCT-2017, sequence version 2.
-DT   12-OCT-2022, entry version 48.
-DE   RecName: Full=Autism susceptibility gene 2 protein homolog;
-GN   Name=Auts2; Synonyms=Kiaa0442 {ECO:0000312|EMBL:BAC97954.1};
+protein_txt = """ID   IQIP1_MOUSE             Reviewed;         559 AA.
+AC   A0A088MLT8; A8IJC6; A8IJD0; A8IJD3; F6YL02; F8WI70; Q3TI53; Q52KH1; Q6P9Y8;
+AC   Q9CX07; Q9JLR0;
+DT   22-NOV-2017, integrated into UniProtKB/Swiss-Prot.
+DT   22-NOV-2017, sequence version 2.
+DT   03-AUG-2022, entry version 35.
+DE   RecName: Full=IQCJ-SCHIP1 readthrough transcript protein {ECO:0000305};
+GN   Name=Iqcj-Schip1 {ECO:0000250|UniProtKB:B3KU38};
+GN   Synonyms=Iqschfp {ECO:0000312|MGI:MGI:5439400}, Schip1
+GN   {ECO:0000312|EMBL:AIN40496.1};
 OS   Mus musculus (Mouse).
 OC   Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi; Mammalia;
 OC   Eutheria; Euarchontoglires; Glires; Rodentia; Myomorpha; Muroidea; Muridae;
 OC   Murinae; Mus; Mus.
-OX   NCBI_TaxID=10090 {ECO:0000312|Proteomes:UP000000589};
+OX   NCBI_TaxID=10090 {ECO:0000312|EMBL:AIN40496.1};
 RN   [1]
-RP   NUCLEOTIDE SEQUENCE [LARGE SCALE MRNA] (ISOFORM 2).
-RX   PubMed=16141072; DOI=10.1126/science.1112014;
-RA   Carninci P., Kasukawa T., Katayama S., Gough J., Frith M.C., Maeda N.,
-RA   Oyama R., Ravasi T., Lenhard B., Wells C., Kodzius R., Shimokawa K.,
-RA   Bajic V.B., Brenner S.E., Batalov S., Forrest A.R., Zavolan M., Davis M.J.,
-RA   Wilming L.G., Aidinis V., Allen J.E., Ambesi-Impiombato A., Apweiler R.,
-RA   Aturaliya R.N., Bailey T.L., Bansal M., Baxter L., Beisel K.W., Bersano T.,
-RA   Bono H., Chalk A.M., Chiu K.P., Choudhary V., Christoffels A.,
-RA   Clutterbuck D.R., Crowe M.L., Dalla E., Dalrymple B.P., de Bono B.,
-RA   Della Gatta G., di Bernardo D., Down T., Engstrom P., Fagiolini M.,
-RA   Faulkner G., Fletcher C.F., Fukushima T., Furuno M., Futaki S.,
-RA   Gariboldi M., Georgii-Hemming P., Gingeras T.R., Gojobori T., Green R.E.,
-RA   Gustincich S., Harbers M., Hayashi Y., Hensch T.K., Hirokawa N., Hill D.,
-RA   Huminiecki L., Iacono M., Ikeo K., Iwama A., Ishikawa T., Jakt M.,
-RA   Kanapin A., Katoh M., Kawasawa Y., Kelso J., Kitamura H., Kitano H.,
-RA   Kollias G., Krishnan S.P., Kruger A., Kummerfeld S.K., Kurochkin I.V.,
-RA   Lareau L.F., Lazarevic D., Lipovich L., Liu J., Liuni S., McWilliam S.,
-RA   Madan Babu M., Madera M., Marchionni L., Matsuda H., Matsuzawa S., Miki H.,
-RA   Mignone F., Miyake S., Morris K., Mottagui-Tabar S., Mulder N., Nakano N.,
-RA   Nakauchi H., Ng P., Nilsson R., Nishiguchi S., Nishikawa S., Nori F.,
-RA   Ohara O., Okazaki Y., Orlando V., Pang K.C., Pavan W.J., Pavesi G.,
-RA   Pesole G., Petrovsky N., Piazza S., Reed J., Reid J.F., Ring B.Z.,
-RA   Ringwald M., Rost B., Ruan Y., Salzberg S.L., Sandelin A., Schneider C.,
-RA   Schoenbach C., Sekiguchi K., Semple C.A., Seno S., Sessa L., Sheng Y.,
-RA   Shibata Y., Shimada H., Shimada K., Silva D., Sinclair B., Sperling S.,
-RA   Stupka E., Sugiura K., Sultana R., Takenaka Y., Taki K., Tammoja K.,
-RA   Tan S.L., Tang S., Taylor M.S., Tegner J., Teichmann S.A., Ueda H.R.,
-RA   van Nimwegen E., Verardo R., Wei C.L., Yagi K., Yamanishi H.,
-RA   Zabarovsky E., Zhu S., Zimmer A., Hide W., Bult C., Grimmond S.M.,
-RA   Teasdale R.D., Liu E.T., Brusic V., Quackenbush J., Wahlestedt C.,
-RA   Mattick J.S., Hume D.A., Kai C., Sasaki D., Tomaru Y., Fukuda S.,
-RA   Kanamori-Katayama M., Suzuki M., Aoki J., Arakawa T., Iida J., Imamura K.,
-RA   Itoh M., Kato T., Kawaji H., Kawagashira N., Kawashima T., Kojima M.,
-RA   Kondo S., Konno H., Nakano K., Ninomiya N., Nishio T., Okada M., Plessy C.,
-RA   Shibata K., Shiraki T., Suzuki S., Tagami M., Waki K., Watahiki A.,
-RA   Okamura-Oho Y., Suzuki H., Kawai J., Hayashizaki Y.;
-RT   "The transcriptional landscape of the mammalian genome.";
-RL   Science 309:1559-1563(2005).
+RP   NUCLEOTIDE SEQUENCE [MRNA] (ISOFORM IQCJ-SCHIP1-1), ALTERNATIVE SPLICING,
+RP   SUBCELLULAR LOCATION, INTERACTION WITH ANK3 AND CALMODULIN, MUTAGENESIS OF
+RP   53-ILE-GLN-54, AND REGION.
+RC   STRAIN=FVB/NJ;
+RX   PubMed=18550753; DOI=10.1523/jneurosci.1044-08.2008;
+RA   Martin P.M., Carnaud M., Garcia del Cano G., Irondelle M., Irinopoulou T.,
+RA   Girault J.A., Dargent B., Goutebroze L.;
+RT   "Schwannomin-interacting protein-1 isoform IQCJ-SCHIP-1 is a late component
+RT   of nodes of Ranvier and axon initial segments.";
+RL   J. Neurosci. 28:6111-6117(2008).
 RN   [2]
-RP   NUCLEOTIDE SEQUENCE [LARGE SCALE GENOMIC DNA].
-RC   STRAIN=C57BL/6J;
-RX   PubMed=19468303; DOI=10.1371/journal.pbio.1000112;
-RA   Church D.M., Goodstadt L., Hillier L.W., Zody M.C., Goldstein S., She X.,
-RA   Bult C.J., Agarwala R., Cherry J.L., DiCuccio M., Hlavina W., Kapustin Y.,
-RA   Meric P., Maglott D., Birtle Z., Marques A.C., Graves T., Zhou S.,
-RA   Teague B., Potamousis K., Churas C., Place M., Herschleb J., Runnheim R.,
-RA   Forrest D., Amos-Landgraf J., Schwartz D.C., Cheng Z., Lindblad-Toh K.,
-RA   Eichler E.E., Ponting C.P.;
-RT   "Lineage-specific biology revealed by a finished genome assembly of the
-RT   mouse.";
-RL   PLoS Biol. 7:E1000112-E1000112(2009).
+RP   NUCLEOTIDE SEQUENCE [MRNA] (ISOFORM IQCJ-SCHIP1-2), FUNCTION, AND
+RP   DISRUPTION PHENOTYPE.
+RX   PubMed=25953347; DOI=10.1242/dev.119248;
+RA   Klingler E., Martin P.M., Garcia M., Moreau-Fauvarque C., Falk J.,
+RA   Chareyre F., Giovannini M., Chedotal A., Girault J.A., Goutebroze L.;
+RT   "The cytoskeleton-associated protein SCHIP1 is involved in axon guidance,
+RT   and is required for piriform cortex and anterior commissure development.";
+RL   Development 142:2026-2036(2015).
 RN   [3]
-RP   NUCLEOTIDE SEQUENCE [LARGE SCALE MRNA] (ISOFORM 2).
-RX   PubMed=15489334; DOI=10.1101/gr.2596504;
-RG   The MGC Project Team;
-RT   "The status, quality, and expansion of the NIH full-length cDNA project:
-RT   the Mammalian Gene Collection (MGC).";
-RL   Genome Res. 14:2121-2127(2004).
-RN   [4] {ECO:0000312|EMBL:BAC97954.1}
-RP   NUCLEOTIDE SEQUENCE [LARGE SCALE MRNA] OF 848-1261.
-RC   TISSUE=Embryonic tail {ECO:0000312|EMBL:BAC97954.1};
-RX   PubMed=14621295; DOI=10.1093/dnares/10.4.167;
-RA   Okazaki N., Kikuno R., Ohara R., Inamoto S., Koseki H., Hiraoka S.,
-RA   Saga Y., Nagase T., Ohara O., Koga H.;
-RT   "Prediction of the coding sequences of mouse homologues of KIAA gene: III.
-RT   The complete nucleotide sequences of 500 mouse KIAA-homologous cDNAs
-RT   identified by screening of terminal sequences of cDNA clones randomly
-RT   sampled from size-fractionated libraries.";
-RL   DNA Res. 10:167-180(2003).
-RN   [5]
-RP   IDENTIFICATION BY MASS SPECTROMETRY [LARGE SCALE ANALYSIS].
-RC   TISSUE=Kidney;
-RX   PubMed=21183079; DOI=10.1016/j.cell.2010.12.001;
-RA   Huttlin E.L., Jedrychowski M.P., Elias J.E., Goswami T., Rad R.,
-RA   Beausoleil S.A., Villen J., Haas W., Sowa M.E., Gygi S.P.;
-RT   "A tissue-specific atlas of mouse protein phosphorylation and expression.";
-RL   Cell 143:1174-1189(2010).
-RN   [6]
-RP   SUBCELLULAR LOCATION, DEVELOPMENTAL STAGE, AND TISSUE SPECIFICITY.
-RX   PubMed=19948250; DOI=10.1016/j.gep.2009.11.005;
-RA   Bedogni F., Hodge R.D., Nelson B.R., Frederick E.A., Shiba N., Daza R.A.,
-RA   Hevner R.F.;
-RT   "Autism susceptibility candidate 2 (Auts2) encodes a nuclear protein
-RT   expressed in developing brain regions implicated in autism
-RT   neuropathology.";
-RL   Gene Expr. Patterns 10:9-15(2010).
-RN   [7]
-RP   FUNCTION, INTERACTION WITH PREX1; DOCK1 AND ELMO2, SUBCELLULAR LOCATION,
-RP   DOMAIN, ALTERNATIVE SPLICING, AND TISSUE SPECIFICITY.
-RX   PubMed=25533347; DOI=10.1016/j.celrep.2014.11.045;
-RA   Hori K., Nagai T., Shan W., Sakamoto A., Taya S., Hashimoto R., Hayashi T.,
-RA   Abe M., Yamazaki M., Nakao K., Nishioka T., Sakimura K., Yamada K.,
-RA   Kaibuchi K., Hoshino M.;
-RT   "Cytoskeletal regulation by AUTS2 in neuronal migration and
-RT   neuritogenesis.";
-RL   Cell Rep. 9:2166-2179(2014).
-RN   [8]
-RP   DISRUPTION PHENOTYPE, SUBCELLULAR LOCATION, IDENTIFICATION IN A COMPLEX
-RP   WITH PCGF5 AND RNF2, AND TISSUE SPECIFICITY.
-RX   PubMed=25519132; DOI=10.1038/nature13921;
-RA   Gao Z., Lee P., Stafford J.M., von Schimmelmann M., Schaefer A.,
-RA   Reinberg D.;
-RT   "An AUTS2-polycomb complex activates gene expression in the CNS.";
-RL   Nature 516:349-354(2014).
-CC   -!- FUNCTION: Component of a Polycomb group (PcG) multiprotein PRC1-like
-CC       complex, a complex class required to maintain the transcriptionally
-CC       repressive state of many genes, including Hox genes, throughout
-CC       development. PcG PRC1 complex acts via chromatin remodeling and
-CC       modification of histones; it mediates monoubiquitination of histone H2A
-CC       'Lys-119', rendering chromatin heritably changed in its expressibility.
-CC       The PRC1-like complex that contains PCGF5, RNF2, CSNK2B, RYBP and AUTS2
-CC       has decreased histone H2A ubiquitination activity, due to the
-CC       phosphorylation of RNF2 by CSNK2B. As a consequence, the complex
-CC       mediates transcriptional activation (By similarity). In the cytoplasm,
-CC       plays a role in axon and dendrite elongation and in neuronal migration
-CC       during embryonic brain development. Promotes reorganization of the
-CC       actin cytoskeleton, lamellipodia formation and neurite elongation via
-CC       its interaction with RAC guanine nucleotide exchange factors, which
-CC       then leads to the activation of RAC1 (PubMed:25533347).
-CC       {ECO:0000250|UniProtKB:Q8WXX7, ECO:0000269|PubMed:25533347}.
-CC   -!- SUBUNIT: Component of a PRC1-like complex that contains PCGF5, RNF2,
-CC       CSNK2B, RYBP and AUTS2 (PubMed:25519132). Within this complex,
-CC       interacts directly with PCGF5 and CSNK2B (By similarity). Interacts
-CC       with the histone acetyltransferase EP300/p300 (By similarity).
-CC       Interacts (via Pro-rich region) with PREX1, DOCK1 and ELMO2
-CC       (PubMed:25533347). {ECO:0000250|UniProtKB:Q8WXX7,
-CC       ECO:0000269|PubMed:25533347, ECO:0000305|PubMed:25519132}.
-CC   -!- INTERACTION:
-CC       A0A087WPF7; Q99K48: Nono; NbExp=4; IntAct=EBI-27122375, EBI-607499;
-CC   -!- SUBCELLULAR LOCATION: Nucleus {ECO:0000269|PubMed:19948250,
-CC       ECO:0000269|PubMed:25519132, ECO:0000269|PubMed:25533347}. Cytoplasm,
-CC       cytoskeleton {ECO:0000269|PubMed:25533347}. Cell projection, growth
-CC       cone {ECO:0000269|PubMed:25533347}. Note=Detected both in cytoplasm and
-CC       nucleus (PubMed:25533347). Colocalizes with RAC1 at actin-rich growth
-CC       cones (PubMed:25533347). Detected on the promoter region of actively
-CC       transcribed genes (PubMed:25519132). {ECO:0000269|PubMed:25519132,
-CC       ECO:0000269|PubMed:25533347}.
+RP   FUNCTION.
+RX   PubMed=25950943; DOI=10.1111/jnc.13158;
+RA   Papandreou M.J., Vacher H., Fache M.P., Klingler E., Rueda-Boroni F.,
+RA   Ferracci G., Debarnot C., Piperoglou C., Garcia Del Cano G., Goutebroze L.,
+RA   Dargent B.;
+RT   "CK2-regulated schwannomin-interacting protein IQCJ-SCHIP-1 association
+RT   with AnkG contributes to the maintenance of the axon initial segment.";
+RL   J. Neurochem. 134:527-537(2015).
+RN   [4]
+RP   FUNCTION, INTERACTION WITH KCNQ2; KCNQ3 AND SPTBN4, SUBUNIT, AND DISRUPTION
+RP   PHENOTYPE.
+RX   PubMed=27979964; DOI=10.1074/jbc.m116.758029;
+RA   Martin P.M., Cifuentes-Diaz C., Devaux J., Garcia M., Bureau J.,
+RA   Thomasseau S., Klingler E., Girault J.A., Goutebroze L.;
+RT   "Schwannomin-interacting protein 1 isoform IQCJ-SCHIP1 is a multipartner
+RT   ankyrin- and spectrin-binding protein involved in the organization of nodes
+RT   of Ranvier.";
+RL   J. Biol. Chem. 292:2441-2456(2017).
+CC   -!- FUNCTION: May play a role in action potential conduction in myelinated
+CC       cells through the organization of molecular complexes at nodes of
+CC       Ranvier and axon initial segments (PubMed:25953347, PubMed:25950943,
+CC       PubMed:27979964). May also play a role in axon outgrowth and guidance
+CC       (PubMed:25953347). {ECO:0000269|PubMed:25950943,
+CC       ECO:0000269|PubMed:25953347, ECO:0000269|PubMed:27979964}.
+CC   -!- SUBUNIT: Homooligomer (via coiled coil domain) (PubMed:27979964).
+CC       Interacts (via IQ domain) with calmodulin; the interaction is direct
+CC       and lost in presence of calcium (PubMed:18550753). Interacts with ANK3
+CC       (via ANK repeats); required for its localization at axon initial
+CC       segments (AIS) and nodes of Ranvier (PubMed:18550753). Interacts with
+CC       SPTBN4 (PubMed:27979964). Interacts with KCNQ2 and KCNQ3
+CC       (PubMed:27979964). {ECO:0000269|PubMed:18550753,
+CC       ECO:0000269|PubMed:27979964}.
+CC   -!- SUBCELLULAR LOCATION: Cell projection, axon
+CC       {ECO:0000269|PubMed:18550753}. Cytoplasm
+CC       {ECO:0000250|UniProtKB:B3KU38}. Note=Localizes to the axon initial
+CC       segments (AIS) and nodes of Ranvier of neurons and is absent from
+CC       dendrites. {ECO:0000269|PubMed:18550753}.
 CC   -!- ALTERNATIVE PRODUCTS:
-CC       Event=Alternative splicing; Named isoforms=3;
-CC       Name=1;
-CC         IsoId=A0A087WPF7-1; Sequence=Displayed;
-CC       Name=2;
-CC         IsoId=A0A087WPF7-2; Sequence=VSP_059125, VSP_059126;
-CC       Name=3;
-CC         IsoId=A0A087WPF7-3; Sequence=VSP_059124, VSP_059127;
-CC   -!- TISSUE SPECIFICITY: Detected in brain cortex in embryo, neonates and
-CC       adults (at protein level) (PubMed:19948250, PubMed:25533347,
-CC       PubMed:25519132). Detected in embryonic and adult Purkinje cells in the
-CC       cerebellum (PubMed:19948250). Detected in dorsal thalamus and in
-CC       dopaminergic neurons in substantia nigra (PubMed:19948250).
-CC       {ECO:0000269|PubMed:19948250, ECO:0000269|PubMed:25519132,
-CC       ECO:0000269|PubMed:25533347}.
-CC   -!- DEVELOPMENTAL STAGE: Detected in embryonic brain cortex at 15 dpc, and
-CC       at clearly lower levels in adult brain cortex, hippocampus and in
-CC       cerebellum Purkinje cells (at protein level) (PubMed:25519132). Very
-CC       low and barely detectable in embryonic brain at 11 dpc. Detected in the
-CC       developing brain cortex, thalamus and cerebellum at 12 and 14 dpc.
-CC       Uniformly expressed all along the preplate at 13 dpc. At 16 dpc, highly
-CC       expressed in neurons in deep and superficial layers of the frontal
-CC       cortical region of the preplate, with much lower expression in the
-CC       caudal region or the preplate. Highly expressed in thalamus at 14 dpc,
-CC       and at much lower levels in adults. Highly expressed in hippocampus
-CC       after 13 dpc; expression levels increase subsequently and are high in
-CC       dentate gyrus and the CA region of the hippocampus at 19 dpc.
-CC       Expression in dentate gyrus, granule cell layer and the CA region of
-CC       the hippocampus continues in neonates and into adulthood.
-CC       {ECO:0000269|PubMed:19948250}.
-CC   -!- DOMAIN: The Pro-rich region is important for the interaction with RAC
-CC       guanine nucleotide exchange factors and the subsequent activation of
-CC       RAC1, which then promotes lamellipodia formation.
-CC       {ECO:0000269|PubMed:25533347}.
-CC   -!- DISRUPTION PHENOTYPE: Brain-specific gene disruption gives rise to no
-CC       visible phenotype at birth. Mutant mice have normal weight at birth,
-CC       but then show decreased weight gain over the next few days, decreased
-CC       milk uptake, impaired motor skills and impaired ultrasonic vocalization
-CC       after maternal separation. {ECO:0000269|PubMed:25519132}.
-CC   -!- SIMILARITY: Belongs to the AUTS2 family. {ECO:0000305}.
+CC       Event=Alternative splicing; Named isoforms=7;
+CC       Name=Iqcj-schip1-1; Synonyms=IQCJ-SCHIP-1
+CC       {ECO:0000303|PubMed:18550753};
+CC         IsoId=A0A088MLT8-1; Sequence=Displayed;
+CC       Name=Iqcj-schip1-2;
+CC         IsoId=A0A088MLT8-2; Sequence=VSP_059226;
+CC       Name=Iqcj-1;
+CC         IsoId=Q8BPW0-1; Sequence=External;
+CC       Name=Schip1-1; Synonyms=Schip-1a;
+CC         IsoId=P0DPB4-1, Q3TI53-5; Sequence=External;
+CC       Name=Schip1-2;
+CC         IsoId=P0DPB4-2, Q3TI53-1; Sequence=External;
+CC       Name=Schip1-3;
+CC         IsoId=P0DPB4-3, Q3TI53-3; Sequence=External;
+CC       Name=Schip1-4; Synonyms=Schip-1b;
+CC         IsoId=P0DPB4-4, Q3TI53-6; Sequence=External;
+CC   -!- DISRUPTION PHENOTYPE: Mice lacking all isoforms encoded by both Schip1
+CC       and Iqcj-Schip1 are fertile and survive as long as wild-type mice.
+CC       However, they exhibit mild growth delay associated with ataxia and
+CC       reduced pain sensitivity. They display decreased thickness of the
+CC       piriform cortex and partial agenesis of the anterior comissure which
+CC       could be due to impaired axon elongation and guidance. The morphology
+CC       of nodes of Ranvier is affected but nerves do not exhibit significant
+CC       electrophysiological characteristic differences. A reduction in the
+CC       number of axonal projections in the peripheral nerve system is also
+CC       observed. {ECO:0000269|PubMed:25953347, ECO:0000269|PubMed:27979964}.
+CC   -!- MISCELLANEOUS: [Isoform Iqcj-schip1-1]: Based on a naturally occurring
+CC       readthrough transcript which produces an IQCJ-SCHIP1 fusion protein.
+CC       {ECO:0000269|PubMed:18550753}.
+CC   -!- MISCELLANEOUS: [Isoform Iqcj-schip1-2]: Based on a naturally occurring
+CC       readthrough transcript which produces an IQCJ-SCHIP1 fusion protein.
+CC       {ECO:0000269|PubMed:25950943}.
 CC   ---------------------------------------------------------------------------
 CC   Copyrighted by the UniProt Consortium, see https://www.uniprot.org/terms
 CC   Distributed under the Creative Commons Attribution (CC BY 4.0) License
 CC   ---------------------------------------------------------------------------
-DR   EMBL; AK052418; BAC34980.1; -; mRNA.
-DR   EMBL; AC102355; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC103371; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC104195; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC113203; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC113510; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC117622; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC118932; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC121298; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC121500; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC157928; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; AC164607; -; NOT_ANNOTATED_CDS; Genomic_DNA.
-DR   EMBL; BC151031; AAI51032.1; -; mRNA.
-DR   EMBL; BC151047; AAI51048.1; -; mRNA.
-DR   EMBL; AK129144; BAC97954.1; -; mRNA.
-DR   RefSeq; NP_796021.2; NM_177047.3.
-DR   AlphaFoldDB; A0A087WPF7; -.
-DR   IntAct; A0A087WPF7; 19.
-DR   MINT; A0A087WPF7; -.
-DR   STRING; 10090.ENSMUSP00000139759; -.
-DR   iPTMnet; A0A087WPF7; -.
-DR   PhosphoSitePlus; A0A087WPF7; -.
-DR   jPOST; A0A087WPF7; -.
-DR   PaxDb; A0A087WPF7; -.
-DR   ProteomicsDB; 277230; -. [A0A087WPF7-1]
-DR   ProteomicsDB; 277231; -. [A0A087WPF7-2]
-DR   ProteomicsDB; 277232; -. [A0A087WPF7-3]
-DR   Antibodypedia; 623; 92 antibodies from 23 providers.
-DR   Ensembl; ENSMUST00000161226; ENSMUSP00000159434; ENSMUSG00000029673. [A0A087WPF7-1]
-DR   Ensembl; ENSMUST00000161374; ENSMUSP00000124730; ENSMUSG00000029673. [A0A087WPF7-3]
-DR   UCSC; uc008zuv.1; mouse. [A0A087WPF7-1]
-DR   UCSC; uc008zuw.1; mouse.
-DR   MGI; MGI:1919847; Auts2.
-DR   VEuPathDB; HostDB:ENSMUSG00000029673; -.
-DR   eggNOG; ENOG502QSH4; Eukaryota.
-DR   GeneTree; ENSGT00940000154823; -.
-DR   PhylomeDB; A0A087WPF7; -.
-DR   Reactome; R-MMU-8939243; RUNX1 interacts with co-factors whose precise effect on RUNX1 targets is not known.
-DR   BioGRID-ORCS; 319974; 5 hits in 20 CRISPR screens.
-DR   ChiTaRS; Auts2; mouse.
-DR   PRO; PR:A0A087WPF7; -.
-DR   Proteomes; UP000000589; Chromosome 5.
-DR   RNAct; A0A087WPF7; protein.
-DR   Bgee; ENSMUSG00000029673; Expressed in floor plate of midbrain and 272 other tissues.
-DR   ExpressionAtlas; A0A087WPF7; baseline and differential.
-DR   GO; GO:0005737; C:cytoplasm; IEA:UniProtKB-KW.
-DR   GO; GO:0005856; C:cytoskeleton; IEA:UniProtKB-SubCell.
-DR   GO; GO:0030426; C:growth cone; IDA:UniProtKB.
-DR   GO; GO:0005634; C:nucleus; IDA:UniProtKB.
-DR   GO; GO:0003682; F:chromatin binding; ISO:MGI.
-DR   GO; GO:0031532; P:actin cytoskeleton reorganization; IMP:UniProtKB.
-DR   GO; GO:0048675; P:axon extension; IMP:UniProtKB.
-DR   GO; GO:0097484; P:dendrite extension; IMP:UniProtKB.
-DR   GO; GO:0098582; P:innate vocalization behavior; IMP:MGI.
-DR   GO; GO:0001764; P:neuron migration; IMP:UniProtKB.
-DR   GO; GO:0051571; P:positive regulation of histone H3-K4 methylation; ISO:MGI.
-DR   GO; GO:2000620; P:positive regulation of histone H4-K16 acetylation; ISO:MGI.
-DR   GO; GO:0010592; P:positive regulation of lamellipodium assembly; IMP:UniProtKB.
-DR   GO; GO:0035022; P:positive regulation of Rac protein signal transduction; IMP:UniProtKB.
-DR   GO; GO:0045944; P:positive regulation of transcription by RNA polymerase II; ISO:MGI.
-DR   GO; GO:0060013; P:righting reflex; IMP:MGI.
-DR   InterPro; IPR023246; AUTS2.
-DR   PANTHER; PTHR14429; PTHR14429; 1.
-DR   Pfam; PF15336; Auts2; 1.
-DR   PRINTS; PR02044; FIBROSIN1LPF.
+DR   EMBL; EU163409; ABW06762.1; -; mRNA.
+DR   EMBL; KJ941154; AIN40496.1; -; mRNA.
+DR   CCDS; CCDS79923.1; -. [A0A088MLT8-1]
+DR   RefSeq; NP_001106890.1; NM_001113419.2. [A0A088MLT8-1]
+DR   AlphaFoldDB; A0A088MLT8; -.
+DR   SMR; A0A088MLT8; -.
+DR   Ensembl; ENSMUST00000182006; ENSMUSP00000138212; ENSMUSG00000102422. [A0A088MLT8-1]
+DR   GeneID; 100505386; -.
+DR   KEGG; mmu:100505386; -.
+DR   UCSC; uc056zsu.1; mouse. [A0A088MLT8-1]
+DR   CTD; 100505386; -.
+DR   MGI; MGI:5439400; Iqschfp.
+DR   VEuPathDB; HostDB:ENSMUSG00000102422; -.
+DR   GeneTree; ENSGT00390000011127; -.
+DR   OMA; CGTCVPE; -.
+DR   OrthoDB; 1290403at2759; -.
+DR   ChiTaRS; Gm21949; mouse.
+DR   PRO; PR:A0A088MLT8; -.
+DR   Proteomes; UP000000589; Chromosome 3.
+DR   RNAct; A0A088MLT8; protein.
+DR   Bgee; ENSMUSG00000102422; Expressed in dentate gyrus of hippocampal formation granule cell and 22 other tissues.
+DR   GO; GO:0043194; C:axon initial segment; IDA:UniProtKB.
+DR   GO; GO:0030054; C:cell junction; IBA:GO_Central.
+DR   GO; GO:0005737; C:cytoplasm; IEA:UniProtKB-SubCell.
+DR   GO; GO:0033268; C:node of Ranvier; IDA:UniProtKB.
+DR   GO; GO:0005886; C:plasma membrane; IBA:GO_Central.
+DR   GO; GO:0030506; F:ankyrin binding; IDA:UniProtKB.
+DR   GO; GO:0005516; F:calmodulin binding; IDA:UniProtKB.
+DR   GO; GO:0044325; F:transmembrane transporter binding; IPI:UniProtKB.
+DR   GO; GO:0008366; P:axon ensheathment; IMP:UniProtKB.
+DR   GO; GO:0051494; P:negative regulation of cytoskeleton organization; ISS:UniProtKB.
+DR   GO; GO:0035332; P:positive regulation of hippo signaling; IBA:GO_Central.
+DR   InterPro; IPR029362; IQCJ-SCHIP1_N.
+DR   InterPro; IPR039045; SCHIP_1.
+DR   InterPro; IPR015649; SCHIP_1_C.
+DR   PANTHER; PTHR13103; PTHR13103; 1.
+DR   Pfam; PF15157; IQCJ-SCHIP1; 1.
+DR   Pfam; PF10148; SCHIP-1; 1.
 PE   1: Evidence at protein level;
-KW   Alternative splicing; Cell projection; Cytoplasm; Cytoskeleton; Nucleus;
-KW   Phosphoprotein; Reference proteome; Transcription;
-KW   Transcription regulation.
-FT   CHAIN           1..1261
-FT                   /note="Autism susceptibility gene 2 protein homolog"
-FT                   /id="PRO_0000441889"
-FT   REGION          1..88
+KW   Alternative splicing; Cell projection; Coiled coil; Cytoplasm;
+KW   Reference proteome.
+FT   CHAIN           1..559
+FT                   /note="IQCJ-SCHIP1 readthrough transcript protein"
+FT                   /id="PRO_0000442333"
+FT   DOMAIN          47..67
+FT                   /note="IQ"
+FT   REGION          64..141
 FT                   /note="Disordered"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   REGION          105..236
+FT   REGION          161..295
 FT                   /note="Disordered"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   REGION          251..486
+FT   REGION          312..332
 FT                   /note="Disordered"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   REGION          288..471
-FT                   /note="Important for regulation of lamellipodia formation"
-FT                   /evidence="ECO:0000269|PubMed:25533347"
-FT   REGION          505..545
+FT   REGION          380..426
 FT                   /note="Disordered"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   REGION          771..1023
-FT                   /note="Disordered"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   REGION          1121..1148
-FT                   /note="Disordered"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   REGION          1201..1261
-FT                   /note="Disordered"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        45..61
+FT   REGION          415..559
+FT                   /note="Required for interaction with ankyrins"
+FT                   /evidence="ECO:0000269|PubMed:18550753"
+FT   COILED          496..530
+FT                   /evidence="ECO:0000255"
+FT   COMPBIAS        69..97
 FT                   /note="Polar residues"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        105..132
-FT                   /note="Basic and acidic residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        144..162
-FT                   /note="Basic and acidic residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        178..221
+FT   COMPBIAS        108..141
 FT                   /note="Polar residues"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        275..292
-FT                   /note="Basic and acidic residues"
+FT   COMPBIAS        169..183
+FT                   /note="Acidic residues"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        323..362
-FT                   /note="Pro residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        363..416
+FT   COMPBIAS        201..220
 FT                   /note="Polar residues"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        429..451
+FT   COMPBIAS        312..329
 FT                   /note="Polar residues"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        460..475
-FT                   /note="Pro residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        771..791
+FT   COMPBIAS        395..411
 FT                   /note="Polar residues"
 FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        817..851
-FT                   /note="Basic and acidic residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        879..932
-FT                   /note="Basic and acidic residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        959..997
-FT                   /note="Basic and acidic residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   COMPBIAS        1003..1017
-FT                   /note="Polar residues"
-FT                   /evidence="ECO:0000256|SAM:MobiDB-lite"
-FT   MOD_RES         1200
-FT                   /note="Phosphoserine"
-FT                   /evidence="ECO:0000250|UniProtKB:Q8WXX7"
-FT   MOD_RES         1235
-FT                   /note="Phosphoserine"
-FT                   /evidence="ECO:0000250|UniProtKB:Q8WXX7"
-FT   VAR_SEQ         1..457
-FT                   /note="Missing (in isoform 3)"
-FT                   /id="VSP_059124"
-FT   VAR_SEQ         231..258
-FT                   /note="ASDASSEKLFNTVLVNKDPELGVGALPE -> VRRHPLHCKHNPQGSGCTVT
-FT                   CLLVPVPL (in isoform 2)"
-FT                   /id="VSP_059125"
-FT   VAR_SEQ         259..1261
-FT                   /note="Missing (in isoform 2)"
-FT                   /id="VSP_059126"
-FT   VAR_SEQ         563..577
-FT                   /note="Missing (in isoform 3)"
-FT                   /id="VSP_059127"
-SQ   SEQUENCE   1261 AA;  138920 MW;  0E5C161A1211D6FF CRC64;
-     MDGPTRGHGL RKKRRSRSQR DRERRSRAGL GTGAAGGIGA GRTRAPSLAS SSGSDKEDNG
-     KPPSSAPSRP RPPRRKRRES TSAEEDIIDG FAMTSFVTFE ALEKDVAVKP QERAEKRQTP
-     LTKKKREALT NGLSFHSKKS RLSHSHHYSS DRENDRNLCQ HLGKRKKMPK GLRQLKPGQN
-     SCRDSDSESA SGESKGFQRS SSRERLSDSS APSSLGTGYF CDSDSDQEEK ASDASSEKLF
-     NTVLVNKDPE LGVGALPEHN QDAGPIVPKI SGLERSQEKS QDCCKEPVFE PVVLKDPHPQ
-     LPQLPSQAQA EPQLQIPSPG PDLVPRTEAP PQFPPPSTQP AQGPPEAQLQ PAPLPQVQQR
-     PPRPQSPSHL LQQTLPPVQS HPSSQSLSQP LSAYNSSSLS LNSLSSRSST PAKTQPAPPH
-     ISHHPSASPF PLSLPNHSPL HSFTPTLQPP AHSHHPNMFA PPTALPPPPP LTSGSLQVPG
-     HPAGSTYSEQ DILRQELNTR FLASQSADRG ASLGPPPYLR TEFHQHQHQH QHTHQHTHQH
-     TFTPFPHAIP PTAIMPTPAP PMFDKYPTKV DPFYRHSLFH SYPPAVSGIP PMIPPTGPFG
-     SLQGAFQPKT SNPIDVAARP GTVPHTLLQK DPRLTDPFRP MLRKPGKWCA MHVHIAWQIY
-     HHQQKVKKQM QSDPHKLDFG LKPEFLSRPP GPSLFGAIHH PHDLARPSTL FSAAGAAHPT
-     GTPFGPPPHH SNFLNPAAHL EPFNRPSTFT GLAAVGGNAF GGLGNPSVTP NSVFGHKDSP
-     SVQNFSNPHE PWNRLHRTPP SFPTPPPWLK PGELERSASA AAHDRDRDVD KRDSSVSKDD
-     KERESVEKRH PSHPSPAPPV PVSALGHNRS STDPTTRGHL NTEAREKDKP KEKERDHSGS
-     RKDLTTEEHK AKESHLPERD GHSHEGRAAG EEPKQLSRVP SPYVRTPGVD STRPNSTSSR
-     EAEPRKGEPA YENPKKNAEV KVKEERKEDH DLPTEAPQAH RTSEAPPPSS SASASVHPGP
-     LASMPMTVGV TGIHAMNSIG SLDRTRMVTP FMGLSPIPGG ERFPYPSFHW DPMRDPLRDP
-     YRDLDMHRRD PLGRDFLLRN DPLHRLSTPR LYEADRSFRD REPHDYSHHH HHHHHPLAVD
-     PRREHERGGH LDERERLHVL REDYEHPRLH PVHPASLDGH LPHPSLLTPG LPSMHYPRIS
-     PTAGHQNGLL NKTPPTAALS APPPLISTLG GRPGSPRRTT PLSAEIRERP PSHTLKDIEA
-     R"""
+FT   VAR_SEQ         98..325
+FT                   /note="Missing (in isoform Iqcj-schip1-2)"
+FT                   /id="VSP_059226"
+FT   MUTAGEN         53..54
+FT                   /note="IQ->AA: Loss of interaction with calmodulin."
+FT                   /evidence="ECO:0000269|PubMed:18550753"
+SQ   SEQUENCE   559 AA;  61917 MW;  72C5FB63AD80036D CRC64;
+     MRLEELKRLQ NPLEQVDDGK YLLENHQLAM DVENNIENYP LSLQPLESKV KIIQRAWREY
+     LQRQDPLEKR SPSPPSVSSD KLSSSVSMNT FSDSSTPDYR EDGMDLGSDA GSSSSSRASS
+     QSNSTKVTPC SECKSSSSPG GSLDLVSALE DYEEPFPVYQ KKVIDEWAPE EDGEEEEEED
+     DRGYRDDGCP AREPGDVSAR IGSSGSGSRS AATTMPSPMP NGNLHPHDPQ DLRHNGNVVV
+     AGRPNASRVP RRPIQKTQPP GSRRGGRNRA SGGLCLQPPD GGTRVPEEPP APPMDWEALE
+     KHLAGLQFRE QEVRNQGQAR TNSTSAQKNE RESIRQKLAL GSFFDDGPGI YTSCSKSGKP
+     SLSARLQSGM NLQICFVNDS GSDKDSDADD SKTETSLDTP LSPMSKQSSS YSDRDTTEEE
+     SESLDDMDFL TRQKKLQAEA KMALAMAKPM AKMQVEVEKQ NRKKSPVADL LPHMPHISEC
+     LMKRSLKPTD LRDMTIGQLQ VIVNDLHSQI ESLNEELVQL LLIRDELHTE QDAMLVDIED
+     LTRHAESQQK HMAEKMPAK"""
 
 
 def test_get_id_should_find_id():
     # Arrange
-    expected = "AUTS2_MOUSE"
+    expected = "IQIP1_MOUSE"
     # Act / Assert
     assert get_id(protein_txt) == expected
-    
+
+def test_get_accessions_should_find_accessions():
+    # Arrange
+    expected = ["A0A088MLT8", "A8IJC6", "A8IJD0", "A8IJD3", "F6YL02", "F8WI70", "Q3TI53", "Q52KH1", "Q6P9Y8", "Q9CX07", "Q9JLR0"]
+    # Act / Assert
+    assert get_accessions(protein_txt) == expected
+
+def test_get_sequence():
+    # Arrange
+    expected = "MRLEELKRLQNPLEQVDDGKYLLENHQLAMDVENNIENYPLSLQPLESKVKIIQRAWREYLQRQDPLEKRSPSPPSVSSDKLSSSVSMNTFSDSSTPDYREDGMDLGSDAGSSSSSRASSQSNSTKVTPCSECKSSSSPGGSLDLVSALEDYEEPFPVYQKKVIDEWAPEEDGEEEEEEDDRGYRDDGCPAREPGDVSARIGSSGSGSRSAATTMPSPMPNGNLHPHDPQDLRHNGNVVVAGRPNASRVPRRPIQKTQPPGSRRGGRNRASGGLCLQPPDGGTRVPEEPPAPPMDWEALEKHLAGLQFREQEVRNQGQARTNSTSAQKNERESIRQKLALGSFFDDGPGIYTSCSKSGKPSLSARLQSGMNLQICFVNDSGSDKDSDADDSKTETSLDTPLSPMSKQSSSYSDRDTTEEESESLDDMDFLTRQKKLQAEAKMALAMAKPMAKMQVEVEKQNRKKSPVADLLPHMPHISECLMKRSLKPTDLRDMTIGQLQVIVNDLHSQIESLNEELVQLLLIRDELHTEQDAMLVDIEDLTRHAESQQKHMAEKMPAK"
+    # Act / Assert
+    assert get_accessions(protein_txt) == expected
