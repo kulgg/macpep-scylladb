@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "macpep-scylladb"
+version = "0.1.0"
+description = "CLI application to digest uniprot protein .txt files and insert them into Scylla DB."
+authors = ["kulgg <75735874+kulgg@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "macpep_scylladb"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
