@@ -1,0 +1,28 @@
+image: python:3.10
+
+stages:
+  - lint
+  - test
+  - types
+
+before_install:
+  - pip install poetry
+  - poetry config virtualenvs.create false
+
+install:
+  - poetry install
+
+Linting:
+  stage: lint
+  script:
+    - poetry run flake8 --max-line-length=88
+
+Unit Tests:
+  stage: test
+  script:
+    - poetry run pytest
+
+Static Type check:
+  stage: types
+  script:
+    - poetry run mypy .
