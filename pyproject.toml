@@ -14,6 +14,12 @@ python = "^3.10"
 fire = "^0.4.0"
 exitstatus = "^2.2.0"
 
+[tool.poetry.group.dev.dependencies]
+testfixtures = "^7.0.1"
+pytest = "^7.2.0"
+black = "^22.10.0"
+flake8 = "^5.0.4"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

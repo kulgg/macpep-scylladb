@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from macpep_scylladb.models.Protein import Protein
 
+
 class UniprotTextReader():
     """
     Reads EMBL files from UniProt.
@@ -26,7 +27,7 @@ class UniprotTextReader():
     SERIAL_WHITESPACES_REGEX = re.compile(r"\s{2,}")
     """Just a precompiled regex for matching whitespaces
     """
-    
+
     DT_MONTH_LOOKUP_TABLE = {
         "JAN": 1,
         "FEB": 2,
@@ -43,7 +44,6 @@ class UniprotTextReader():
     }
     """Lookup for month number by name. So no locale change is necessary
     """
-    
 
     SERIAL_WHITESPACES_REGEX = re.compile(r"\s{2,}")
     """Just a precompiled regex for matching 2 or more sequential whitespaces
@@ -66,10 +66,9 @@ class UniprotTextReader():
         proteome_id = None
         last_update = "01-JAN-1970"
 
-        
         while True:
             line = next(self.__file_iter)
-            
+
             line = line.rstrip()
 
             if len(line) >= 2:
@@ -114,7 +113,7 @@ class UniprotTextReader():
     def __process_ac(self, line):
         """
         Returns accessions
-        
+
         Parameters
         ----------
         line : str
@@ -210,5 +209,6 @@ class UniprotTextReader():
         """
         dt_date = dt_date.upper()
         day, month, year = dt_date.split("-")
-        date = datetime(int(year), self.__class__.DT_MONTH_LOOKUP_TABLE.get(month, 1), int(day))
+        date = datetime(
+            int(year), self.__class__.DT_MONTH_LOOKUP_TABLE.get(month, 1), int(day))
         return (date - datetime(1970, 1, 1)) / timedelta(seconds=1)
