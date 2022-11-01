@@ -228,4 +228,4 @@ class UniprotTextReader:
         date = datetime(
             int(year), self.__class__.DT_MONTH_LOOKUP_TABLE.get(month, 1), int(day)
         )
-        return (date - datetime(1970, 1, 1)) / timedelta(seconds=1)
+        return int((date - datetime(1970, 1, 1)) / timedelta(seconds=1))

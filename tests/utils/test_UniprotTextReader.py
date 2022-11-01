@@ -34,7 +34,7 @@ def test_next_should_return_test_protein():
         taxonomy_id=10090,
         proteome_id="UP000000589",
         is_reviewed=True,
-        updated_at=1659484800.0,
+        updated_at=1659484800,
     )
 
     # Act / Assert

@@ -9,7 +9,7 @@ SEQUENCE_REGEX = re.compile(r"(\w+)\s?")
 REVIEWED_STATUS_REGEX = re.compile(r"^ID.*?Reviewed;", re.MULTILINE)
 
 
-def get_id(txt: str) -> str:
+""" def get_id(txt: str) -> str:
     match = ID_REGEX.match(txt)
     return match.group(1)
 
@@ -32,3 +32,4 @@ def get_sequence(txt: str) -> str:
 
 def get_review_status(txt: str) -> bool:
     return bool(REVIEWED_STATUS_REGEX.search(txt))
+ """
