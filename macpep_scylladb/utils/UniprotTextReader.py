@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from macpep_scylladb.models.Protein import Protein
 
 
-class UniprotTextReader():
+class UniprotTextReader:
     """
     Reads EMBL files from UniProt.
     Class instances are iterable. The iterator will return instances of Protein.
@@ -40,7 +40,7 @@ class UniprotTextReader():
         "SEP": 9,
         "OCT": 10,
         "NOV": 11,
-        "DEC": 12
+        "DEC": 12,
     }
     """Lookup for month number by name. So no locale change is necessary
     """
@@ -85,13 +85,28 @@ class UniprotTextReader():
                 elif line.startswith("  "):
                     sequence += self.__process_sq_no_header(line)
                 elif line.startswith("DE"):
-                    if name == "" and line[5:].startswith("RecName") or line[5:].startswith("AltName") or line[5:].startswith("Sub"):
+                    if (
+                        name == ""
+                        and line[5:].startswith("RecName")
+                        or line[5:].startswith("AltName")
+                        or line[5:].startswith("Sub")
+                    ):
                         name = self.__process_de_name(line[5:])
                 elif line.startswith("DT"):
                     last_update = line[5:16]
                 elif line.startswith("//"):
                     primary_accession = accessions.pop(0)
-                    return Protein(primary_accession, accessions, entry_name, name, sequence, taxonomy_id, proteome_id, is_reviewed, self.__dt_date_to_utc_timestamp(last_update))
+                    return Protein(
+                        primary_accession,
+                        accessions,
+                        entry_name,
+                        name,
+                        sequence,
+                        taxonomy_id,
+                        proteome_id,
+                        is_reviewed,
+                        self.__dt_date_to_utc_timestamp(last_update),
+                    )
 
     def __process_id(self, line):
         """
@@ -156,7 +171,7 @@ class UniprotTextReader():
 
         Returns
         -------
-        Proteome ID 
+        Proteome ID
         """
         # Split line by spaces and return the second element without last character (';')
         return line.split()[1][:-1]
@@ -196,7 +211,7 @@ class UniprotTextReader():
 
     def __dt_date_to_utc_timestamp(self, dt_date: str) -> int:
         """
-        Calculate UTC timestamp, see: https://docs.python.org/3/library/datetime.html#datetime.datetime.timestamp 
+        Calculate UTC timestamp, see: https://docs.python.org/3/library/datetime.html#datetime.datetime.timestamp
 
         Arguments
         ---------
@@ -210,5 +225,6 @@ class UniprotTextReader():
         dt_date = dt_date.upper()
         day, month, year = dt_date.split("-")
         date = datetime(
-            int(year), self.__class__.DT_MONTH_LOOKUP_TABLE.get(month, 1), int(day))
+            int(year), self.__class__.DT_MONTH_LOOKUP_TABLE.get(month, 1), int(day)
+        )
         return (date - datetime(1970, 1, 1)) / timedelta(seconds=1)

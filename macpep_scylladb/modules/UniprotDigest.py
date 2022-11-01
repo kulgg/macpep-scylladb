@@ -10,7 +10,7 @@ class UniprotDigest:
         a = self.get_next_protein(f)
         print(a)
         f.close()
-        
+
     def get_next_protein(self, f: TextIOWrapper) -> str:
         protein = ""
         line = f.readline()
@@ -18,7 +18,7 @@ class UniprotDigest:
         while line != "//\n":
             protein += line
             line = f.readline()
-        
+
         return protein
 
 
