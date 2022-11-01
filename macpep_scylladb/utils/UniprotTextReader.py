@@ -173,7 +173,7 @@ class UniprotTextReader:
         -------
         Proteome ID
         """
-        # Split line by spaces and return the second element without last character (';')
+        # Split line by spaces and return the second element without last character ';'
         return line.split()[1][:-1]
 
     def __process_sq_no_header(self, line):
@@ -211,7 +211,8 @@ class UniprotTextReader:
 
     def __dt_date_to_utc_timestamp(self, dt_date: str) -> int:
         """
-        Calculate UTC timestamp, see: https://docs.python.org/3/library/datetime.html#datetime.datetime.timestamp
+        Calculate UTC timestamp, see:
+        https://docs.python.org/3/library/datetime.html#datetime.datetime.timestamp
 
         Arguments
         ---------
