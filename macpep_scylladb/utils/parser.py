@@ -1,12 +1,12 @@
 import re
 from typing import List
 
-ID_REGEX = re.compile("ID   (\w+).*", re.MULTILINE)
-ACCESSION_LINES_REGEX = re.compile("AC   .*", re.MULTILINE)
-ACCESSIONS_REGEX = re.compile("(\w+);\s?")
-SEQUENCE_LINES_REGEX = re.compile("^     \w+.*", re.MULTILINE)
-SEQUENCE_REGEX = re.compile("(\w+)\s?")
-REVIEWED_STATUS_REGEX = re.compile("^ID.*?Reviewed;", re.MULTILINE)
+ID_REGEX = re.compile(r"ID   (\w+).*", re.MULTILINE)
+ACCESSION_LINES_REGEX = re.compile(r"AC   .*", re.MULTILINE)
+ACCESSIONS_REGEX = re.compile(r"(\w+);\s?")
+SEQUENCE_LINES_REGEX = re.compile(r"^     \w+.*", re.MULTILINE)
+SEQUENCE_REGEX = re.compile(r"(\w+)\s?")
+REVIEWED_STATUS_REGEX = re.compile(r"^ID.*?Reviewed;", re.MULTILINE)
 
 
 def get_id(txt: str) -> str:
