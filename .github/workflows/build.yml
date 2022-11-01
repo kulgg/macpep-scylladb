@@ -1,28 +1,37 @@
-image: python:3.10
+name: build
 
-stages:
-  - lint
-  - test
-  - types
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-before_install:
-  - pip install poetry
-  - poetry config virtualenvs.create false
+permissions:
+  contents: read
 
-install:
-  - poetry install
+jobs:
+  build:
 
-Linting:
-  stage: lint
-  script:
-    - poetry run flake8 --max-line-length=88
+    runs-on: ubuntu-latest
 
-Unit Tests:
-  stage: test
-  script:
-    - poetry run pytest
-
-Static Type check:
-  stage: types
-  script:
-    - poetry run mypy .
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install Poetry
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry config virtualenvs.create false
+        poetry install
+    - name: Lint with flake8
+      run: |
+        poetry run flake8 --max-line-length=88
+    - name: Test with pytest
+      run: |
+        poetry run pytest
+    - name: Static type checking
+      run: |
+        poetry run mypy .
