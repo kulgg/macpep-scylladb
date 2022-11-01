@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 ID_REGEX = re.compile(r"ID   (\w+).*", re.MULTILINE)
 ACCESSION_LINES_REGEX = re.compile(r"AC   .*", re.MULTILINE)
@@ -12,7 +11,6 @@ REVIEWED_STATUS_REGEX = re.compile(r"^ID.*?Reviewed;", re.MULTILINE)
 """ def get_id(txt: str) -> str:
     match = ID_REGEX.match(txt)
     return match.group(1)
-
 
 def get_accessions(txt: str) -> List[str]:
     accessions = []
