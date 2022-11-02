@@ -1,0 +1,13 @@
+version: "3"
+networks:
+  scylla:
+
+services:
+  node1:
+    image: scylladb/scylla
+    container_name: node1
+    command: "--api-address 0.0.0.0"
+    ports:
+      - 9042:9042
+    networks:
+      - scylla

@@ -3,6 +3,7 @@ import sys
 
 import fire
 from exitstatus import ExitStatus
+from macpep_scylladb.modules.CqlTest import CqlTest
 
 from macpep_scylladb.modules.UniprotDigest import UniprotDigest
 
@@ -10,6 +11,7 @@ from macpep_scylladb.modules.UniprotDigest import UniprotDigest
 class Commands:
     def __init__(self):
         self.digest = UniprotDigest()
+        self.cql = CqlTest()
 
 
 def configure_logging():
