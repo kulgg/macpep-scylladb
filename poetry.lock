@@ -69,7 +69,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "exceptiongroup"
-version = "1.0.0"
+version = "1.0.2"
 description = "Backport of PEP 654 (exception groups)"
 category = "dev"
 optional = false
@@ -80,11 +80,11 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "exitstatus"
-version = "2.2.0"
+version = "2.3.0"
 description = "POSIX exit status codes"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [[package]]
 name = "fire"
@@ -178,7 +178,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
 name = "pathspec"
-version = "0.10.1"
+version = "0.10.2"
 description = "Utility library for gitignore style pattern matching of file paths."
 category = "dev"
 optional = false
@@ -186,15 +186,15 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "platformdirs"
-version = "2.5.2"
-description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+version = "2.5.4"
+description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx (>=4)", "sphinx-autodoc-typehints (>=1.12)"]
-test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
+docs = ["furo (>=2022.9.29)", "proselint (>=0.13)", "sphinx (>=5.3)", "sphinx-autodoc-typehints (>=1.19.4)"]
+test = ["appdirs (==1.4.4)", "pytest (>=7.2)", "pytest-cov (>=4)", "pytest-mock (>=3.10)"]
 
 [[package]]
 name = "pluggy"
@@ -265,7 +265,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "termcolor"
-version = "2.0.1"
+version = "2.1.0"
 description = "ANSI color formatting for output in terminal"
 category = "main"
 optional = false
@@ -276,7 +276,7 @@ tests = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "testfixtures"
-version = "7.0.1"
+version = "7.0.3"
 description = "A collection of helpers and mock objects for unit tests and doc tests."
 category = "dev"
 optional = false
@@ -373,12 +373,12 @@ colorama = [
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
 exceptiongroup = [
-    {file = "exceptiongroup-1.0.0-py3-none-any.whl", hash = "sha256:2ac84b496be68464a2da60da518af3785fff8b7ec0d090a581604bc870bdee41"},
-    {file = "exceptiongroup-1.0.0.tar.gz", hash = "sha256:affbabf13fb6e98988c38d9c5650e701569fe3c1de3233cfb61c5f33774690ad"},
+    {file = "exceptiongroup-1.0.2-py3-none-any.whl", hash = "sha256:c22f11ec6a10d2b453871c5c5fe887436c4d1961324ce9090f2ca6ddc4180c27"},
+    {file = "exceptiongroup-1.0.2.tar.gz", hash = "sha256:a31cd183c3dea02e617aab5153588d5f7258a77b51f0ef41b3815ae8a0d0f695"},
 ]
 exitstatus = [
-    {file = "exitstatus-2.2.0-py3-none-any.whl", hash = "sha256:977b69ba4d2147e112fdc0661cac1541c5639f7b116c51f12dedc48f4dffcc8b"},
-    {file = "exitstatus-2.2.0.tar.gz", hash = "sha256:89f638e9b3361b8b57fb9e716e918cc947decd15bf10af9b2d9ad85c23096480"},
+    {file = "exitstatus-2.3.0-py3-none-any.whl", hash = "sha256:605db05fb44526e0079903c56efc0db633e621a63a359075a3d13ddd065cea0e"},
+    {file = "exitstatus-2.3.0.tar.gz", hash = "sha256:7d050bb3044a0eba44e131cbb4fae59d327d85ae455f589f2e61199e637cccef"},
 ]
 fire = [
     {file = "fire-0.4.0.tar.gz", hash = "sha256:c5e2b8763699d1142393a46d0e3e790c5eb2f0706082df8f647878842c216a62"},
@@ -434,12 +434,12 @@ packaging = [
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
 pathspec = [
-    {file = "pathspec-0.10.1-py3-none-any.whl", hash = "sha256:46846318467efc4556ccfd27816e004270a9eeeeb4d062ce5e6fc7a87c573f93"},
-    {file = "pathspec-0.10.1.tar.gz", hash = "sha256:7ace6161b621d31e7902eb6b5ae148d12cfd23f4a249b9ffb6b9fee12084323d"},
+    {file = "pathspec-0.10.2-py3-none-any.whl", hash = "sha256:88c2606f2c1e818b978540f73ecc908e13999c6c3a383daf3705652ae79807a5"},
+    {file = "pathspec-0.10.2.tar.gz", hash = "sha256:8f6bf73e5758fd365ef5d58ce09ac7c27d2833a8d7da51712eac6e27e35141b0"},
 ]
 platformdirs = [
-    {file = "platformdirs-2.5.2-py3-none-any.whl", hash = "sha256:027d8e83a2d7de06bbac4e5ef7e023c02b863d7ea5d079477e722bb41ab25788"},
-    {file = "platformdirs-2.5.2.tar.gz", hash = "sha256:58c8abb07dcb441e6ee4b11d8df0ac856038f944ab98b7be6b27b2a3c7feef19"},
+    {file = "platformdirs-2.5.4-py3-none-any.whl", hash = "sha256:af0276409f9a02373d540bf8480021a048711d572745aef4b7842dad245eba10"},
+    {file = "platformdirs-2.5.4.tar.gz", hash = "sha256:1006647646d80f16130f052404c6b901e80ee4ed6bef6792e1f238a8969106f7"},
 ]
 pluggy = [
     {file = "pluggy-1.0.0-py2.py3-none-any.whl", hash = "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"},
@@ -466,12 +466,12 @@ six = [
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
 termcolor = [
-    {file = "termcolor-2.0.1-py3-none-any.whl", hash = "sha256:7e597f9de8e001a3208c4132938597413b9da45382b6f1d150cff8d062b7aaa3"},
-    {file = "termcolor-2.0.1.tar.gz", hash = "sha256:6b2cf769e93364a2676e1de56a7c0cff2cf5bd07f37e9cc80b0dd6320ebfe388"},
+    {file = "termcolor-2.1.0-py3-none-any.whl", hash = "sha256:91dd04fdf661b89d7169cefd35f609b19ca931eb033687eaa647cef1ff177c49"},
+    {file = "termcolor-2.1.0.tar.gz", hash = "sha256:b80df54667ce4f48c03fe35df194f052dc27a541ebbf2544e4d6b47b5d6949c4"},
 ]
 testfixtures = [
-    {file = "testfixtures-7.0.1-py3-none-any.whl", hash = "sha256:a461529f36c4ccfcc5c8c842c0a5e4342b1ae78384e8176146ab7fddca0af586"},
-    {file = "testfixtures-7.0.1.tar.gz", hash = "sha256:f7b3caee196f21e022025d6ba3a3467b0268f1921a6617da98da444b90bc1438"},
+    {file = "testfixtures-7.0.3-py3-none-any.whl", hash = "sha256:8e21110ccea169745c839699b5718370906f59100bb291aed46e3a7b5ae28435"},
+    {file = "testfixtures-7.0.3.tar.gz", hash = "sha256:942bc751d45068658e11277f213ce1868476e141ea4240da0fb6712ae6f96401"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
