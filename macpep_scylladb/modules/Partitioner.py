@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from sortedcontainers import SortedList
 
@@ -18,9 +19,9 @@ class Partitioner:
                 mass_list.add(self.proteomics.calculate_mass(protein.sequence))
 
             num_peptides = len(mass_list)
-            print("Total peptides:", num_peptides)
+            logging.info("Total peptides: %d", num_peptides)
             peptides_per_partition = int(num_peptides / num_partitions)
-            print("Peptides per partition:", peptides_per_partition)
+            logging.info("Peptides per partition: %d", peptides_per_partition)
 
             partitions = [
                 mass_list[i * peptides_per_partition] for i in range(num_partitions)
@@ -37,3 +38,19 @@ class Partitioner:
             #     print(i, count)
 
             return partitions
+
+    def get_partition_index(self, partitions: List[int], mass: int) -> int:
+        start, end = 0, len(partitions) - 1
+
+        while start <= end:
+            mid = (start + end) // 2
+            if mass >= partitions[mid] and (
+                mid + 1 == len(partitions) or mass < partitions[mid + 1]
+            ):
+                return mid
+            if mass >= partitions[mid]:
+                start = mid + 1
+            else:
+                end = mid - 1
+
+        return -1
