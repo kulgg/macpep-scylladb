@@ -16,18 +16,35 @@ class Partitioner:
         with open(uniprot_txt_path) as uniprot_file:
             reader = UniprotTextReader(uniprot_file)
             mass_list = SortedList()
+            num_proteins = 0
+            num_peptides = 0
 
             for protein in reader:
-                mass_list.add(self.proteomics.calculate_mass(protein.sequence))
+                num_proteins += 1
+                for peptide_sequence in self.proteomics.digest(protein.sequence):
+                    mass_list.add(self.proteomics.calculate_mass(peptide_sequence))
+                    num_peptides += 1
+                    if num_peptides % 100000 == 0:
+                        logging.info("Processed %d peptides", num_peptides)
 
             num_peptides = len(mass_list)
-            logging.info("Total peptides: %d", num_peptides)
+            logging.info("Number of proteins: %d", num_proteins)
+            logging.info("Number of peptides: %d", num_peptides)
+            logging.info("Partitions: %d", num_partitions)
             peptides_per_partition = int(num_peptides / num_partitions)
             logging.info("Peptides per partition: %d", peptides_per_partition)
 
             partitions = [
                 mass_list[i * peptides_per_partition] for i in range(num_partitions)
             ]
+            partitions[0] = 0
+
+            logging.info("Partition Distribution")
+            for i in range(1, num_partitions):
+                logging.info(
+                    "[%d] %d <= mass < %d", i, partitions[i - 1], partitions[i]
+                )
+            logging.info("[%d] %d <= mass", num_partitions, partitions[-1])
 
             # Double check partition sizes
             # for i in range(len(partitions)):
