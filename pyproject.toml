@@ -14,6 +14,7 @@ python = "^3.10"
 fire = "^0.4.0"
 exitstatus = "^2.2.0"
 cassandra-driver = "^3.25.0"
+sortedcontainers = "^2.4.0"
 
 [tool.poetry.group.dev.dependencies]
 testfixtures = "^7.0.1"
