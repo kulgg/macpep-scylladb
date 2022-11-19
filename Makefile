@@ -20,6 +20,7 @@ restart:
 info:
 	docker exec -it $$(docker-compose ps -q node1) nodetool describecluster
 
+# Python Build
 build: lint check_types test
 
 lint:
