@@ -10,9 +10,7 @@ class Partitioner:
     def __init__(self, proteomics: Proteomics):
         self.proteomics = proteomics
 
-    def generate_distribution(
-        self, num_partitions: int, uniprot_txt_path: str
-    ) -> List[int]:
+    def generate(self, num_partitions: int, uniprot_txt_path: str) -> List[int]:
         with open(uniprot_txt_path) as uniprot_file:
             reader = UniprotTextReader(uniprot_file)
             mass_list = SortedList()
