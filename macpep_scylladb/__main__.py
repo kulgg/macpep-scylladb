@@ -4,14 +4,15 @@ import sys
 import fire
 from exitstatus import ExitStatus
 from macpep_scylladb.modules.CqlTest import CqlTest
-
-from macpep_scylladb.modules.UniprotDigest import UniprotDigest
+from macpep_scylladb.modules.Partitioner import Partitioner
+from macpep_scylladb.modules.Proteomics import Proteomics
 
 
 class Commands:
     def __init__(self):
-        self.digest = UniprotDigest()
         self.cql = CqlTest()
+        self.proteomics = Proteomics()
+        self.partitioner = Partitioner(self.proteomics)
 
 
 def configure_logging():
