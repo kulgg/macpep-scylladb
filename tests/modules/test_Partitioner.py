@@ -31,6 +31,6 @@ def test_get_partition():
         20: 11,
     }
 
-    for k, v in mass_to_partition_index.items():
-        actual = partitioner.get_partition_index(partitions, k)
-        assert actual == v
+    for mass, partition_index in mass_to_partition_index.items():
+        actual = partitioner.get_partition_index(partitions, mass)
+        assert actual == partition_index

@@ -10,8 +10,10 @@ class Partitioner:
     def __init__(self, proteomics: Proteomics):
         self.proteomics = proteomics
 
-    def generate_distribution(self, num_partitions: int, file_path: str) -> List[int]:
-        with open(file_path) as uniprot_file:
+    def generate_distribution(
+        self, num_partitions: int, uniprot_txt_path: str
+    ) -> List[int]:
+        with open(uniprot_txt_path) as uniprot_file:
             reader = UniprotTextReader(uniprot_file)
             mass_list = SortedList()
 
@@ -54,3 +56,10 @@ class Partitioner:
                 end = mid - 1
 
         return -1
+
+    def get_partition_index_from_sequence(
+        self, partitions: List[int], sequence: str
+    ) -> int:
+        return self.get_partition_index(
+            partitions, self.proteomics.calculate_mass(sequence)
+        )
