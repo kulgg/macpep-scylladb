@@ -7,7 +7,7 @@ class Proteomics:
         pass
 
     def calculate_mass(self, sequence: str) -> int:
-        mass = H2O.mono_mass
+        mass: int = H2O.mono_mass
         for c in sequence:
             mass += AminoAcid.get_by_one_letter_code(c).mono_mass
         return mass

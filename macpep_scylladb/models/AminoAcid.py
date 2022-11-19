@@ -67,7 +67,10 @@ class AminoAcid:
     def __hash__(self) -> int:
         return hash(self.one_letter_code)
 
-    def __eq__(self, other: AminoAcid) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AminoAcid):
+            return NotImplemented
+
         return self.one_letter_code == other.one_letter_code
 
     def get_one_letter_code_ascii_dec(self) -> int:
