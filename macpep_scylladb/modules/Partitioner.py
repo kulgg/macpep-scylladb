@@ -24,9 +24,6 @@ class Partitioner:
                     mass = self.proteomics.calculate_mass(peptide_sequence)
                     peptides_per_mass[mass] += 1
                     num_peptides += 1
-                    print(peptide_sequence, mass, protein.sequence)
-                    if num_peptides == 10:
-                        quit()
                     if num_peptides % 100000 == 0:
                         logging.info("Processed %d peptides", num_peptides)
 
