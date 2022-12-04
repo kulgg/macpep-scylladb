@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Union
+from typing import List
 from cassandra.cqlengine.management import sync_table
 from cassandra.cqlengine import connection
 from macpep_scylladb.database.Peptide import Peptide
