@@ -1,7 +1,7 @@
 from collections import defaultdict
 import logging
 import os
-from typing import List
+from typing import List, Dict
 
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
@@ -14,7 +14,7 @@ class Partitioner:
     def generate(self, num_partitions: int, uniprot_txt_path: str) -> List[int]:
         with open(uniprot_txt_path) as uniprot_file:
             reader = UniprotTextReader(uniprot_file)
-            peptides_per_mass = defaultdict(int)
+            peptides_per_mass: Dict[int, int] = defaultdict(int)
             num_proteins = 0
             num_peptides = 0
 

@@ -4,7 +4,8 @@ from cassandra.cqlengine import connection
 from macpep_scylladb.database.Peptide import Peptide
 from cassandra.cluster import Cluster
 
-from macpep_scylladb.modules import Partitioner, Proteomics
+from macpep_scylladb.modules.Proteomics import Proteomics
+from macpep_scylladb.modules.Partitioner import Partitioner
 
 
 class Cql:
@@ -33,7 +34,9 @@ class Cql:
             print("Keyspace 'macpep' already exists, skipping creation.")
         else:
             session.execute(
-                "CREATE KEYSPACE macpep WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}"
+                """CREATE KEYSPACE macpep
+                WITH REPLICATION = {'class': 'SimpleStrategy',
+                'replication_factor': 1}"""
             )
         session.shutdown()
         cluster.shutdown()
