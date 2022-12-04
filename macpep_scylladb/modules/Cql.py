@@ -25,6 +25,11 @@ class Cql:
             3841096254963,
         ]
 
+    def setup(self, server):
+        self.create_keyspace(server)
+        self.create_table(server)
+        self.insert_test(server)
+
     def create_keyspace(self, server: str):
         cluster = Cluster([server])
         session = cluster.connect()
@@ -93,6 +98,22 @@ class Cql:
         logging.info("Partition %d", partition)
         peptides = Peptide.objects.filter(partition=partition, mass=mass)
         logging.info(f"Found {peptides.count()} peptides with mass {mass}.")
+
+        for peptide in peptides:
+            print(peptide.sequence)
+
+    def query_peptides_by_mass_range(self, server: str, lower: int, upper: int):
+        connection.setup([server], "macpep")
+        logging.info("Querying %d <= mass <= %d", lower, upper)
+        lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
+        upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
+        logging.info("Partitions %d-%d", lower_partition, upper_partition)
+        peptides = []
+        for i in range(lower_partition, upper_partition + 1):
+            peptides.extend(
+                Peptide.objects.filter(partition=i, mass__gte=lower, mass__lte=upper)
+            )
+        logging.info(f"Found {len(peptides)} peptides")
 
         for peptide in peptides:
             print(peptide.sequence)
