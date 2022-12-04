@@ -10,9 +10,9 @@ from macpep_scylladb.modules.Proteomics import Proteomics
 
 class Commands:
     def __init__(self):
-        self.cql = Cql()
         self.proteomics = Proteomics()
         self.partitioner = Partitioner(self.proteomics)
+        self.cql = Cql(self.proteomics, self.partitioner)
 
 
 def configure_logging():

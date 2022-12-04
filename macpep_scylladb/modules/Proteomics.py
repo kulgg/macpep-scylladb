@@ -28,7 +28,7 @@ class Proteomics:
         sequence: str,
         enzyme: DigestEnzyme = Trypsin(
             max_number_of_missed_cleavages=3,
-            minimum_peptide_length=0,
+            minimum_peptide_length=3,
             maximum_peptide_length=60,
         ),
     ) -> List[str]:
