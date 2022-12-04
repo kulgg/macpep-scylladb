@@ -1,6 +1,7 @@
+from collections import defaultdict
 import logging
+import os
 from typing import List
-from sortedcontainers import SortedList
 
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
@@ -13,29 +14,32 @@ class Partitioner:
     def generate(self, num_partitions: int, uniprot_txt_path: str) -> List[int]:
         with open(uniprot_txt_path) as uniprot_file:
             reader = UniprotTextReader(uniprot_file)
-            mass_list = SortedList()
+            peptides_per_mass = defaultdict(int)
             num_proteins = 0
             num_peptides = 0
 
             for protein in reader:
                 num_proteins += 1
                 for peptide_sequence in self.proteomics.digest(protein.sequence):
-                    mass_list.add(self.proteomics.calculate_mass(peptide_sequence))
+                    mass = self.proteomics.calculate_mass(peptide_sequence)
+                    peptides_per_mass[mass] += 1
                     num_peptides += 1
                     if num_peptides % 100000 == 0:
                         logging.info("Processed %d peptides", num_peptides)
 
-            num_peptides = len(mass_list)
             logging.info("Number of proteins: %d", num_proteins)
             logging.info("Number of peptides: %d", num_peptides)
             logging.info("Partitions: %d", num_partitions)
             peptides_per_partition = int(num_peptides / num_partitions)
             logging.info("Peptides per partition: %d", peptides_per_partition)
 
-            partitions = [
-                mass_list[i * peptides_per_partition] for i in range(num_partitions)
-            ]
-            partitions[0] = 0
+            partitions = [0]
+            counter = 0
+            for mass, count in peptides_per_mass.items():
+                counter += count
+                if counter >= peptides_per_partition:
+                    partitions.append(mass)
+                    counter = 0
 
             logging.info("Partition Distribution")
             for i in range(1, num_partitions):
@@ -44,15 +48,22 @@ class Partitioner:
                 )
             logging.info("[%d] %d <= mass", num_partitions, partitions[-1])
 
-            # Double check partition sizes
-            # for i in range(len(partitions)):
-            #     count = 0
-            #     for mass in mass_list:
-            #         if mass >= partitions[i] and (
-            #             i + 1 == len(partitions) or mass < partitions[i + 1]
-            #         ):
-            #             count += 1
-            #     print(i, count)
+            peptide_counts = [0] * num_partitions
+            for mass, count in peptides_per_mass.items():
+                for i in range(num_partitions):
+                    if mass >= partitions[i] and (
+                        i + 1 == num_partitions or mass < partitions[i + 1]
+                    ):
+                        peptide_counts[i] += count
+
+            for i in range(num_partitions):
+                logging.info("Partition %d: %d peptides", i, peptide_counts[i])
+
+            out_file_path = "out/partitions.txt"
+            os.makedirs(os.path.dirname(out_file_path), exist_ok=True)
+            with open(out_file_path, "w") as f:
+                for partition in partitions:
+                    f.write(f"{partition}\n")
 
             return partitions
 
