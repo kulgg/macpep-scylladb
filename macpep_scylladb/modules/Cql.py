@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional, Union
 from cassandra.cqlengine.management import sync_table
 from cassandra.cqlengine import connection
 from macpep_scylladb.database.Peptide import Peptide
@@ -106,43 +107,44 @@ class Cql:
             partition=1, mass=589307140804, sequence="SSTPAK", proteins={protein}
         ).save()
 
-    def query_peptides_by_sequence(self, server: str, sequence: str):
+    def query_peptides_by_sequence(self, server: str, sequence: str) -> List[Peptide]:
         connection.setup([server], "macpep")
         mass = self.proteomics.calculate_mass(sequence)
         logging.info("Mass %d", mass)
         partition = self.partitioner.get_partition_index(self.partitions, mass)
         logging.info("Partition %d", partition)
-        peptides = Peptide.objects.filter(
-            partition=partition, mass=mass, sequence=sequence
+        peptides: List[Peptide] = []
+        peptides.extend(
+            Peptide.objects.filter(partition=partition, mass=mass, sequence=sequence)
         )
-        logging.info(f"Found {peptides.count()} peptides with sequence {sequence}.")
+        logging.info(f"Found {len(peptides)} peptides with sequence {sequence}.")
 
-        for peptide in peptides:
-            print(peptide)
+        return peptides
 
-    def query_peptides_by_mass(self, server: str, mass: int):
+    def query_peptides_by_mass(self, server: str, mass: int) -> List[Peptide]:
         connection.setup([server], "macpep")
         logging.info("Mass %d", mass)
         partition = self.partitioner.get_partition_index(self.partitions, mass)
         logging.info("Partition %d", partition)
-        peptides = Peptide.objects.filter(partition=partition, mass=mass)
-        logging.info(f"Found {peptides.count()} peptides with mass {mass}.")
+        peptides: List[Peptide] = []
+        peptides.extend(Peptide.objects.filter(partition=partition, mass=mass))
+        logging.info(f"Found {len(peptides)} peptides with mass {mass}.")
 
-        for peptide in peptides:
-            print(peptide)
+        return peptides
 
-    def query_peptides_by_mass_range(self, server: str, lower: int, upper: int):
+    def query_peptides_by_mass_range(
+        self, server: str, lower: int, upper: int
+    ) -> List[Peptide]:
         connection.setup([server], "macpep")
         logging.info("Querying %d <= mass <= %d", lower, upper)
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
         logging.info("Partitions %d-%d", lower_partition, upper_partition)
-        peptides = []
+        peptides: List[Peptide] = []
         for i in range(lower_partition, upper_partition + 1):
             peptides.extend(
                 Peptide.objects.filter(partition=i, mass__gte=lower, mass__lte=upper)
             )
         logging.info(f"Found {len(peptides)} peptides")
 
-        for peptide in peptides:
-            print(peptide)
+        return peptides
