@@ -7,6 +7,8 @@ from cassandra.cluster import Cluster
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.modules.Partitioner import Partitioner
 
+protein = "MDGPTRGHGLRKKRRSRSQRDRERRSRAGLGTGAAGGIGAGRTRAPSLASSSGSDKEDNGKPPSSAPSRPRPPRRKRRESTSAEEDIIDGFAMTSFVTFEALEKDVAVKPQERAEKRQTPLTKKKREALTNGLSFHSKKSRLSHSHHYSSDRENDRNLCQHLGKRKKMPKGLRQLKPGQNSCRDSDSESASGESKGFQRSSSRERLSDSSAPSSLGTGYFCDSDSDQEEKASDASSEKLFNTVLVNKDPELGVGALPEHNQDAGPIVPKISGLERSQEKSQDCCKEPVFEPVVLKDPHPQLPQLPSQAQAEPQLQIPSPGPDLVPRTEAPPQFPPPSTQPAQGPPEAQLQPAPLPQVQQRPPRPQSPSHLLQQTLPPVQSHPSSQSLSQPLSAYNSSSLSLNSLSSRSSTPAKTQPAPPHISHHPSASPFPLSLPNHSPLHSFTPTLQPPAHSHHPNMFAPPTALPPPPPLTSGSLQVPGHPAGSTYSEQDILRQELNTRFLASQSADRGASLGPPPYLRTEFHQHQHQHQHTHQHTHQHTFTPFPHAIPPTAIMPTPAPPMFDKYPTKVDPFYRHSLFHSYPPAVSGIPPMIPPTGPFGSLQGAFQPKTSNPIDVAARPGTVPHTLLQKDPRLTDPFRPMLRKPGKWCAMHVHIAWQIYHHQQKVKKQMQSDPHKLDFGLKPEFLSRPPGPSLFGAIHHPHDLARPSTLFSAAGAAHPTGTPFGPPPHHSNFLNPAAHLEPFNRPSTFTGLAAVGGNAFGGLGNPSVTPNSVFGHKDSPSVQNFSNPHEPWNRLHRTPPSFPTPPPWLKPGELERSASAAAHDRDRDVDKRDSSVSKDDKERESVEKRHPSHPSPAPPVPVSALGHNRSSTDPTTRGHLNTEAREKDKPKEKERDHSGSRKDLTTEEHKAKESHLPERDGHSHEGRAAGEEPKQLSRVPSPYVRTPGVDSTRPNSTSSREAEPRKGEPAYENPKKNAEVKVKEERKEDHDLPTEAPQAHRTSEAPPPSSSASASVHPGPLASMPMTVGVTGIHAMNSIGSLDRTRMVTPFMGLSPIPGGERFPYPSFHWDPMRDPLRDPYRDLDMHRRDPLGRDFLLRNDPLHRLSTPRLYEADRSFRDREPHDYSHHHHHHHHPLAVDPRREHERGGHLDERERLHVLREDYEHPRLHPVHPASLDGHLPHPSLLTPGLPSMHYPRISPTAGHQNGLLNKTPPTAALSAPPPLISTLGGRPGSPRRTTPLSAEIRERPPSHTLKDIEAR"
+
 
 class Cql:
     def __init__(self, proteomics: Proteomics, partitioner: Partitioner):
@@ -25,7 +27,7 @@ class Cql:
             3841096254963,
         ]
 
-    def setup(self, server):
+    def setup(self, server: str):
         self.create_keyspace(server)
         self.create_table(server)
         self.insert_test(server)
@@ -52,32 +54,59 @@ class Cql:
 
     def insert_test(self, server: str):
         connection.setup([server], "macpep")
-        Peptide(partition=0, mass=502286345739, sequence="QLSR").save()
-        Peptide(partition=2, mass=945474040024, sequence="SQRDRER").save()
+        Peptide(
+            partition=0, mass=502286345739, sequence="QLSR", proteins={protein}
+        ).save()
+        Peptide(
+            partition=2, mass=945474040024, sequence="SQRDRER", proteins={protein}
+        ).save()
         Peptide(
             partition=8,
             mass=3684549317922,
             sequence="ERLSDSSAPSSLGTGYFCDSDSDQEEKASDASSEK",
+            proteins={protein},
         ).save()
         Peptide(
-            partition=5, mass=2529289540729, sequence="AGLGTGAAGGIGAGRTRAPSLASSSGSDK"
+            partition=5,
+            mass=2529289540729,
+            sequence="AGLGTGAAGGIGAGRTRAPSLASSSGSDK",
+            proteins={protein},
         ).save()
         Peptide(
-            partition=6, mass=2947478329205, sequence="ISGLERSQEKSQDCCKEPVFEPVVLK"
+            partition=6,
+            mass=2947478329205,
+            sequence="ISGLERSQEKSQDCCKEPVFEPVVLK",
+            proteins={protein},
         ).save()
         Peptide(
-            partition=7, mass=3018410767455, sequence="DREPHDYSHHHHHHHHPLAVDPRR"
+            partition=7,
+            mass=3018410767455,
+            sequence="DREPHDYSHHHHHHHHPLAVDPRR",
+            proteins={protein},
         ).save()
         Peptide(
             partition=9,
             mass=3841096254963,
             sequence="ISPTAGHQNGLLNKTPPTAALSAPPPLISTLGGRPGSPR",
+            proteins={protein},
         ).save()
-        Peptide(partition=4, mass=1614738647319, sequence="EDHDLPTEAPQAHR").save()
-        Peptide(partition=3, mass=1612755360019, sequence="SASAAAHDRDRDVDK").save()
-        Peptide(partition=1, mass=589307140804, sequence="SSTPAK").save()
+        Peptide(
+            partition=4,
+            mass=1614738647319,
+            sequence="EDHDLPTEAPQAHR",
+            proteins={protein},
+        ).save()
+        Peptide(
+            partition=3,
+            mass=1612755360019,
+            sequence="SASAAAHDRDRDVDK",
+            proteins={protein},
+        ).save()
+        Peptide(
+            partition=1, mass=589307140804, sequence="SSTPAK", proteins={protein}
+        ).save()
 
-    def query_peptides_by_sequence(self, server, sequence: str):
+    def query_peptides_by_sequence(self, server: str, sequence: str):
         connection.setup([server], "macpep")
         mass = self.proteomics.calculate_mass(sequence)
         logging.info("Mass %d", mass)
@@ -89,7 +118,7 @@ class Cql:
         logging.info(f"Found {peptides.count()} peptides with sequence {sequence}.")
 
         for peptide in peptides:
-            print(peptide.sequence)
+            print(peptide)
 
     def query_peptides_by_mass(self, server: str, mass: int):
         connection.setup([server], "macpep")
@@ -100,7 +129,7 @@ class Cql:
         logging.info(f"Found {peptides.count()} peptides with mass {mass}.")
 
         for peptide in peptides:
-            print(peptide.sequence)
+            print(peptide)
 
     def query_peptides_by_mass_range(self, server: str, lower: int, upper: int):
         connection.setup([server], "macpep")
@@ -116,4 +145,4 @@ class Cql:
         logging.info(f"Found {len(peptides)} peptides")
 
         for peptide in peptides:
-            print(peptide.sequence)
+            print(peptide)

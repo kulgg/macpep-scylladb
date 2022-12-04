@@ -8,6 +8,7 @@ class Peptide(Model):
     partition = columns.SmallInt(primary_key=True)
     mass = columns.BigInt(primary_key=True)
     sequence = columns.Text(primary_key=True)
+    proteins = columns.Set(columns.Text)
     length = columns.SmallInt()
     number_of_missed_cleavages = columns.SmallInt()
     a_count = columns.SmallInt(default=0)
