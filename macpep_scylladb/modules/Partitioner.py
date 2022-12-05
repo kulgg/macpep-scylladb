@@ -28,7 +28,7 @@ class Partitioner:
                 counter = 0
         return partitions
 
-    def _get_peptide_counts(self, num_partitions, partitions, peptides_per_mass):
+    def _get_peptide_counts(num_partitions, partitions, peptides_per_mass):
         peptide_counts = [0] * num_partitions
         for mass, count in peptides_per_mass.items():
             for i in range(num_partitions):
