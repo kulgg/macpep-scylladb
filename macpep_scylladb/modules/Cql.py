@@ -43,7 +43,7 @@ class Cql:
         else:
             session.execute(
                 """CREATE KEYSPACE macpep
-                WITH REPLICATION = {'class': 'SimpleStrategy',
+                WITH REPLICATION = {'class': 'NetworkTopologyStrategy',
                 'replication_factor': 1}"""
             )
         session.shutdown()
