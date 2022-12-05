@@ -10,6 +10,18 @@ class Query:
     def __init__(self, proteomics: Proteomics, partitioner: Partitioner):
         self.proteomics = proteomics
         self.partitioner = partitioner
+        self.partitions = [
+            0,
+            589307140804,
+            945474040024,
+            1612755360019,
+            1614738647319,
+            2529289540729,
+            2947478329205,
+            3018410767455,
+            3684549317922,
+            3841096254963,
+        ]
 
     def peptides_by_sequence(self, server: str, sequence: str) -> List[Peptide]:
         connection.setup([server], "macpep")
@@ -22,7 +34,6 @@ class Query:
             Peptide.objects.filter(partition=partition, mass=mass, sequence=sequence)
         )
         logging.info(f"Found {len(peptides)} peptides with sequence {sequence}.")
-
         return peptides
 
     def peptides_by_mass(self, server: str, mass: int) -> List[Peptide]:

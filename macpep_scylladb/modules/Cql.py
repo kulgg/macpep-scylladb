@@ -8,18 +8,7 @@ protein = "MDGPTRGHGLRKKRRSRSQRDRERRSRAGLGTGAAGGIGAGRTRAPSLASSSGSDKEDNGKPPSSAPSR
 
 class Cql:
     def __init__(self):
-        self.partitions = [
-            0,
-            589307140804,
-            945474040024,
-            1612755360019,
-            1614738647319,
-            2529289540729,
-            2947478329205,
-            3018410767455,
-            3684549317922,
-            3841096254963,
-        ]
+        pass
 
     def setup(self, server: str):
         self.create_keyspace(server)
