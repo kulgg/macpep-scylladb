@@ -1,13 +1,33 @@
 version: "3"
-networks:
-  scylla:
-
 services:
   node1:
     image: scylladb/scylla
-    container_name: node1
-    command: "--api-address 0.0.0.0"
     ports:
-      - 9042:9042
+      - "9042:9042"
+    restart: always
+    command: --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
     networks:
-      - scylla
+      - scylla-net
+  node2:
+    image: scylladb/scylla
+    restart: always
+    command: --seeds=node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    networks:
+      - scylla-net
+  node3:
+    image: scylladb/scylla
+    restart: always
+    command: --seeds=node1 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    networks:
+      - scylla-net
+  app:
+    build: .
+    command: tail -f /dev/null
+    networks:
+      - scylla-net
+    volumes:
+      - .:/app
+
+networks:
+  scylla-net:
+    driver: bridge

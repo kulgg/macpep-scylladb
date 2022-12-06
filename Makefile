@@ -1,8 +1,13 @@
-start:
+# Scylla Docker
+up:
 	docker-compose up -d
-
+down:
+	docker-compose down
 stop:
 	docker-compose stop
+buildimage:
+	docker-compose build
+
 
 # ScyllaDB
 cqlsh:
@@ -13,6 +18,9 @@ logs:
 
 status:
 	docker exec -it $$(docker-compose ps -q node1) nodetool status
+
+app:
+	docker exec -it $$(docker-compose ps -q app) bash
 
 restart:
 	docker exec -it $$(docker-compose ps -q node1) supervisorctl restart scylla

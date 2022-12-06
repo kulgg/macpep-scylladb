@@ -1,3 +1,5 @@
+import random
+import string
 from cassandra.cqlengine.management import sync_table
 from cassandra.cqlengine import connection
 from macpep_scylladb.database.Peptide import Peptide
@@ -34,6 +36,16 @@ class Cql:
     def create_table(self, server: str):
         connection.setup([server], "macpep")
         sync_table(Peptide)
+
+    def insert_loop(self, server: str, elements: int):
+        connection.setup([server], "macpep")
+        for _ in range(elements):
+            partition = random.randint(0, 9)
+            mass = random.randint(0, 1000000000)
+            sequence = "".join(random.choices(string.ascii_uppercase, k=10))
+            Peptide(
+                partition=partition, mass=mass, sequence=sequence, proteins={protein}
+            ).save()
 
     def insert_test(self, server: str):
         connection.setup([server], "macpep")
