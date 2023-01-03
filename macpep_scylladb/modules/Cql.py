@@ -1,4 +1,3 @@
-import logging
 import random
 import string
 from cassandra.cqlengine.management import sync_table
@@ -13,7 +12,11 @@ protein = "MDGPTRGHGLRKKRRSRSQRDRERRSRAGLGTGAAGGIGAGRTRAPSLASSSGSDKEDNGKPPSSAPSR
 
 class Cql:
     def __init__(self):
-        pass
+        self.connected = False
+
+    def _connect(self, server):
+        connection.setup([server], "macpep")
+        self.connected = True
 
     def setup(self, server: str):
         self.create_keyspace(server)
@@ -37,12 +40,19 @@ class Cql:
         cluster.shutdown()
 
     def create_tables(self, server: str):
-        connection.setup([server], "macpep")
+        if not self.connected:
+            self._connect(server)
         sync_table(Peptide)
         sync_table(Protein)
 
+    def insert_protein(self, server: str, p: Protein):
+        if not self.connected:
+            self._connect(server)
+        p.save()
+
     def upsert_peptide(self, server: str, p: Peptide):
-        connection.setup([server], "macpep")
+        if not self.connected:
+            self._connect(server)
         p.validate()
         attrs = p._as_dict()
         # This seems to do it in one command, instead of SELECT + Create/Update
@@ -85,7 +95,8 @@ class Cql:
         )
 
     def insert_loop(self, server: str, elements: int):
-        connection.setup([server], "macpep")
+        if not self.connected:
+            self._connect(server)
         for _ in range(elements):
             partition = random.randint(0, 1000)
             mass = random.randint(0, 1000000000)
@@ -95,7 +106,8 @@ class Cql:
             ).save()
 
     def insert_test(self, server: str):
-        connection.setup([server], "macpep")
+        if not self.connected:
+            self._connect(server)
         self.upsert_peptide(
             server,
             Peptide(

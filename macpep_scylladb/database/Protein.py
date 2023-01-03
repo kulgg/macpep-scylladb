@@ -3,6 +3,8 @@ from cassandra.cqlengine.models import Model
 
 
 class Protein(Model):
+    __table_name__ = "proteins"
+
     accession = columns.Text(primary_key=True, required=True)
     secondary_accessions = columns.List(columns.Text, required=True)
     entry_name = columns.Text(required=True)

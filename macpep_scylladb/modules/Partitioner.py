@@ -1,9 +1,8 @@
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, wait
+import collections
 import logging
 import os
-import threading
-from typing import List, Dict
+from typing import List, Dict, OrderedDict
 
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
@@ -14,17 +13,22 @@ class Partitioner:
         self.proteomics = proteomics
 
     def _get_partitions(
-        self, num_partitions: int, num_peptides: int, peptides_per_mass: Dict[int, int]
+        self,
+        num_partitions: int,
+        num_peptides: int,
+        peptides_per_mass: OrderedDict[int, int],
     ) -> List[int]:
         peptides_per_partition = int(num_peptides / num_partitions)
         logging.info("Peptides per partition: %d", peptides_per_partition)
 
-        partitions = [0]
+        partitions = [0 for _ in range(num_partitions)]
         counter = 0
+        i = 1
         for mass, count in peptides_per_mass.items():
             counter += count
             if counter >= peptides_per_partition:
-                partitions.append(mass)
+                partitions[i] = mass
+                i += 1
                 counter = 0
         return partitions
 
@@ -38,7 +42,12 @@ class Partitioner:
                     peptide_counts[i] += count
         return peptide_counts
 
-    def generate(self, num_partitions: int, uniprot_txt_path: str) -> List[int]:
+    def generate(
+        self,
+        num_partitions: int,
+        uniprot_txt_path: str,
+        partitions_path: str = "data/partitions.txt",
+    ) -> List[int]:
         with open(uniprot_txt_path) as uniprot_file:
             reader = UniprotTextReader(uniprot_file)
             peptides_per_mass: Dict[int, int] = defaultdict(int)
@@ -58,71 +67,23 @@ class Partitioner:
             logging.info("Number of peptides: %d", num_peptides)
             logging.info("Partitions: %d", num_partitions)
 
+            od_peptides_per_mass = collections.OrderedDict(
+                sorted(peptides_per_mass.items())
+            )
+
             partitions = self._get_partitions(
-                num_partitions, num_peptides, peptides_per_mass
+                num_partitions, num_peptides, od_peptides_per_mass
             )
 
             peptide_counts = self._get_peptide_counts(
-                num_partitions, partitions, peptides_per_mass
+                num_partitions, partitions, od_peptides_per_mass
             )
 
             for i in range(num_partitions):
                 logging.info("Partition %d: %d peptides", i, peptide_counts[i])
 
-            out_file_path = "out/partitions.txt"
-            os.makedirs(os.path.dirname(out_file_path), exist_ok=True)
-            with open(out_file_path, "w") as f:
-                for partition in partitions:
-                    f.write(f"{partition}\n")
-
-            return partitions
-
-    def generate_parallel(
-        self, num_partitions: int, uniprot_txt_path: str
-    ) -> List[int]:
-        with open(uniprot_txt_path) as uniprot_file:
-            reader = UniprotTextReader(uniprot_file)
-            peptides_per_mass: Dict[int, int] = defaultdict(int)
-            num_proteins = 0
-            num_peptides = 0
-            num_peptides_lock = threading.Lock()
-
-            def process_protein(protein):
-                nonlocal num_peptides, num_proteins
-                local_peptides = 0
-
-                for peptide_sequence in self.proteomics.digest(protein.sequence):
-                    mass = self.proteomics.calculate_mass(peptide_sequence)
-                    peptides_per_mass[mass] += 1
-                    local_peptides += 1
-                with num_peptides_lock:
-                    num_proteins += 1
-                    num_peptides += local_peptides
-
-            with ThreadPoolExecutor() as executor:
-                tasks = [
-                    executor.submit(process_protein, protein) for protein in reader
-                ]
-                wait(tasks)
-
-            logging.info("Number of proteins: %d", num_proteins)
-            logging.info("Number of peptides: %d", num_peptides)
-            logging.info("Partitions: %d", num_partitions)
-
-            partitions = self._get_partitions(
-                num_partitions, num_peptides, peptides_per_mass
-            )
-
-            peptide_counts = self._get_peptide_counts(
-                num_partitions, partitions, peptides_per_mass
-            )
-
-            for i in range(num_partitions):
-                logging.info("Partition %d: %d peptides", i, peptide_counts[i])
-
-            out_file_path = "out/partitions.txt"
-            os.makedirs(os.path.dirname(out_file_path), exist_ok=True)
-            with open(out_file_path, "w") as f:
+            os.makedirs(os.path.dirname(partitions_path), exist_ok=True)
+            with open(partitions_path, "w") as f:
                 for partition in partitions:
                     f.write(f"{partition}\n")
 
