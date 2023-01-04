@@ -61,3 +61,5 @@ class Query:
                 Peptide.objects.filter(partition=i, mass__gte=lower, mass__lte=upper)
             )
         logging.info(f"Found {len(peptides)} peptides")
+
+        return peptides

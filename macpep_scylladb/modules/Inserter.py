@@ -159,10 +159,10 @@ class Inserter:
         )
         progress_logger.start()
 
-        cluster = Cluster([self.server])
-        session = cluster.connect("macpep")
+        # cluster = Cluster([self.server])
+        # session = cluster.connect("macpep")
 
-        proteins = []
+        # proteins = []
         for protein in reader:
             self.num_proteins += 1
             protein_db = to_database(protein)
