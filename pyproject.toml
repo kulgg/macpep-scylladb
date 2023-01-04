@@ -16,6 +16,7 @@ exitstatus = "^2.2.0"
 cassandra-driver = "^3.25.0"
 sortedcontainers = "^2.4.0"
 progress = "^1.6"
+xxhash = "^3.2.0"
 
 [tool.poetry.group.dev.dependencies]
 testfixtures = "^7.0.1"
