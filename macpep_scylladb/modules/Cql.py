@@ -53,12 +53,23 @@ class Cql:
         p.save()
 
     def insert_proteins(self, session, proteins: List[Protein]):
-        insert_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?, "is_metadata_up_to_date" = ? WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
+        insert_statement_str = """INSERT INTO macpep.proteins ("partition", "accession", "secondary_accessions", "entry_name", "name", "sequence", "taxonomy_id", "proteome_id", "is_reviewed", "updated_at") VALUES (?,?,?,?,?,?,?,?,?,?)"""
         insert_statement = session.prepare(insert_statement_str)
 
         statements_and_params = []
         for p in proteins:
-            params = ()
+            params = (
+                p.partition,
+                p.accession,
+                p.secondary_accessions,
+                p.entry_name,
+                p.name,
+                p.sequence,
+                p.taxonomy_id,
+                p.proteome_id,
+                p.is_reviewed,
+                p.updated_at,
+            )
             statements_and_params.append((insert_statement, params))
 
         execute_concurrent(session, statements_and_params, raise_on_first_error=True)
@@ -109,12 +120,6 @@ class Cql:
             statements_and_params.append((update_statement, params))
 
         execute_concurrent(session, statements_and_params, raise_on_first_error=True)
-
-        # for success, result in results:
-        #     if not success:
-        #         handle_error(result)  # result will be an Exception
-        #     else:
-        #         process_user(result[0])  # result will be a list of rows
 
     def upsert_peptide(self, server: str, p: Peptide):
         if not self.connected:
@@ -169,68 +174,3 @@ class Cql:
             Peptide(
                 partition=partition, mass=mass, sequence=sequence, proteins={protein}
             ).save()
-
-    def insert_test(self, server: str):
-        if not self.connected:
-            self._connect(server)
-        self.upsert_peptide(
-            server,
-            Peptide(
-                partition=0,
-                mass=502286345739,
-                sequence="QLSR",
-                proteins={protein},
-                length=4,
-                number_of_missed_cleavages=0,
-                n_terminus=0,
-                c_terminus=0,
-            ),
-        )
-        # Peptide(
-        #     partition=2, mass=945474040024, sequence="SQRDRER", proteins={protein}
-        # ).save()
-        # Peptide(
-        #     partition=8,
-        #     mass=3684549317922,
-        #     sequence="ERLSDSSAPSSLGTGYFCDSDSDQEEKASDASSEK",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=5,
-        #     mass=2529289540729,
-        #     sequence="AGLGTGAAGGIGAGRTRAPSLASSSGSDK",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=6,
-        #     mass=2947478329205,
-        #     sequence="ISGLERSQEKSQDCCKEPVFEPVVLK",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=7,
-        #     mass=3018410767455,
-        #     sequence="DREPHDYSHHHHHHHHPLAVDPRR",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=9,
-        #     mass=3841096254963,
-        #     sequence="ISPTAGHQNGLLNKTPPTAALSAPPPLISTLGGRPGSPR",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=4,
-        #     mass=1614738647319,
-        #     sequence="EDHDLPTEAPQAHR",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=3,
-        #     mass=1612755360019,
-        #     sequence="SASAAAHDRDRDVDK",
-        #     proteins={protein},
-        # ).save()
-        # Peptide(
-        #     partition=1, mass=589307140804, sequence="SSTPAK", proteins={protein}
-        # ).save()

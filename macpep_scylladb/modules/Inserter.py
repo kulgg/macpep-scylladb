@@ -46,9 +46,8 @@ class Inserter:
                 peptides.append(peptide)
         if session:
             cql.upsert_peptides(session, peptides)
-            # num_peptides += 1
-            # if num_peptides % 100000 == 0:
-            #     logging.info("Processed %d peptides", num_peptides)
+            with self.lock:
+                self.num_peptides += len(peptides)
 
     def _worker(self, queue, use_concurrency):
         session = None
@@ -77,16 +76,11 @@ class Inserter:
             elapsed_time = time.time() - start_time
             items_per_second = num_processed / elapsed_time
             self.bar.suffix = (
-                f"{num_processed}/{self.num_lines} {items_per_second:.2f} proteins/sec"
+                f"{num_processed}/{self.num_lines} Proteins {items_per_second:.2f}P/sec"
+                f" {self.num_peptides} Peptides"
             )
             self.bar.next(num_processed - old_num_processed)
             old_num_processed = num_processed
-            # logging.info(
-            #     "Queue size %d Processed %d\nProgress %.2f%%",
-            #     qsize,
-            #     num_processed,
-            #     num_processed / self.num_lines,
-            # )
             sleep(0.1)
 
     def run_serial(
@@ -142,11 +136,12 @@ class Inserter:
         reader = UniprotTextReader(uniprot_f)
 
         self.num_proteins = 0
-        num_peptides = 0
+        self.num_peptides = 0
 
         m = multiprocessing.Manager()
         queue = m.Queue()
-        num_worker_threads = 10
+        num_worker_threads = 14
+        self.lock = threading.Lock()
         threads = []
         for _ in range(num_worker_threads):
             t = threading.Thread(target=self._worker, args=(queue, use_concurrency))
@@ -159,18 +154,9 @@ class Inserter:
         )
         progress_logger.start()
 
-        # cluster = Cluster([self.server])
-        # session = cluster.connect("macpep")
-
-        # proteins = []
         for protein in reader:
             self.num_proteins += 1
-            protein_db = to_database(protein)
-            self.cql.insert_protein(self.server, protein_db)
-            # proteins.append(protein_db)
-            # if len(proteins) == 100:
-            #     self.cql.insert_proteins(session, proteins)
-            #     proteins = []
+            self.cql.insert_protein(self.server, to_database(protein))
             queue.put(protein)
 
         for _ in range(num_worker_threads):
@@ -183,6 +169,6 @@ class Inserter:
         progress_logger.join()
 
         logging.info("Number of proteins: %d", self.num_proteins)
-        logging.info("Number of peptides: %d", num_peptides)
+        logging.info("Number of peptides: %d", self.num_peptides)
 
         uniprot_f.close()
