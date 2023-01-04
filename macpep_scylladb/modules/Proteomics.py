@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import List, Set, Tuple
 from macpep_scylladb.models.AminoAcid import (
     AminoAcid,
 )
@@ -32,7 +32,7 @@ class Proteomics:
             maximum_peptide_length=60,
         ),
     ) -> List[str]:
-        peptides: Set[str] = set()
+        peptides: Set[Tuple[str, int]] = set()
         protein_parts = enzyme.cleavage_regex.split(sequence)
         peptide_range = range(
             enzyme.minimum_peptide_length, enzyme.maximum_peptide_length + 1
@@ -50,12 +50,7 @@ class Proteomics:
                     len(peptide_sequence) in peptide_range
                     and UnknownAminoAcid.one_letter_code not in peptide_sequence
                 ):
-                    peptides.add(
-                        peptide_sequence
-                        # peptide_mod.Peptide(
-                        #     peptide_sequence, missed_cleavage - part_index
-                        # )
-                    )
+                    peptides.add((peptide_sequence, missed_cleavage - part_index))
                     if is_sequence_containing_replaceable_ambigous_amino_acids(
                         peptide_sequence
                     ):
@@ -63,5 +58,5 @@ class Proteomics:
                             peptide_sequence
                         )
                         for sequence in differentiated_sequences:
-                            peptides.add(sequence)
+                            peptides.add((sequence, missed_cleavage - part_index))
         return list(peptides)

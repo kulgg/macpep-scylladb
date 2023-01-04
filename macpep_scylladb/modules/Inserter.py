@@ -1,3 +1,4 @@
+from collections import Counter
 import logging
 import time
 from progress.bar import Bar
@@ -27,18 +28,46 @@ class Inserter:
             cql = self.cql
 
         peptides = []
-        for peptide_sequence in self.proteomics.digest(protein.sequence):
+        for peptide_sequence, num_of_missed_cleavages in self.proteomics.digest(
+            protein.sequence
+        ):
             mass = self.proteomics.calculate_mass(peptide_sequence)
             partition = self.partitioner.get_partition_index(self.partitions, mass)
+            amino_acid_counter = Counter(peptide_sequence)
             peptide = Peptide(
                 partition=partition,
                 mass=mass,
                 sequence=peptide_sequence,
                 proteins={protein.accession},
                 length=len(peptide_sequence),
-                number_of_missed_cleavages=0,
-                n_terminus=0,
-                c_terminus=0,
+                number_of_missed_cleavages=num_of_missed_cleavages,
+                a_count=amino_acid_counter["A"],
+                b_count=amino_acid_counter["B"],
+                c_count=amino_acid_counter["C"],
+                d_count=amino_acid_counter["D"],
+                e_count=amino_acid_counter["E"],
+                f_count=amino_acid_counter["F"],
+                g_count=amino_acid_counter["G"],
+                h_count=amino_acid_counter["H"],
+                i_count=amino_acid_counter["I"],
+                j_count=amino_acid_counter["J"],
+                k_count=amino_acid_counter["K"],
+                l_count=amino_acid_counter["L"],
+                m_count=amino_acid_counter["M"],
+                n_count=amino_acid_counter["N"],
+                o_count=amino_acid_counter["O"],
+                p_count=amino_acid_counter["P"],
+                q_count=amino_acid_counter["Q"],
+                r_count=amino_acid_counter["R"],
+                s_count=amino_acid_counter["S"],
+                t_count=amino_acid_counter["T"],
+                u_count=amino_acid_counter["U"],
+                v_count=amino_acid_counter["V"],
+                w_count=amino_acid_counter["W"],
+                y_count=amino_acid_counter["Y"],
+                z_count=amino_acid_counter["Z"],
+                n_terminus=ord(peptide_sequence[0]),
+                c_terminus=ord(peptide_sequence[-1]),
             )
             if not session:
                 cql.upsert_peptide(self.server, peptide)
