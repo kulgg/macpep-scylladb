@@ -21,7 +21,7 @@ class Commands:
 
 def configure_logging():
     log_format = "%(asctime)s [%(levelname)s] %(module)s.%(funcName)s(): %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=log_format)
+    logging.basicConfig(level=logging.INFO, format=log_format)
 
 
 def main():

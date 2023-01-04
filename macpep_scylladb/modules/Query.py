@@ -12,15 +12,15 @@ class Query:
         self.partitioner = partitioner
         self.partitions = [
             0,
-            589307140804,
-            945474040024,
-            1612755360019,
-            1614738647319,
-            2529289540729,
-            2947478329205,
-            3018410767455,
-            3684549317922,
-            3841096254963,
+            644335421209,
+            961537885881,
+            1297732714404,
+            1660711111977,
+            2063197693248,
+            2519216181507,
+            3060541732774,
+            3737901303107,
+            4705032292661,
         ]
 
     def peptides_by_sequence(self, server: str, sequence: str) -> List[Peptide]:
@@ -61,5 +61,3 @@ class Query:
                 Peptide.objects.filter(partition=i, mass__gte=lower, mass__lte=upper)
             )
         logging.info(f"Found {len(peptides)} peptides")
-
-        return peptides
