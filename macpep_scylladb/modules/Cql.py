@@ -23,7 +23,6 @@ class Cql:
     def setup(self, server: str):
         self.create_keyspace(server)
         self.create_tables(server)
-        self.insert_test(server)
 
     def create_keyspace(self, server: str):
         cluster = Cluster([server])
