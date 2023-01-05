@@ -17,7 +17,7 @@ logs:
 	docker logs $$(docker-compose ps -q node1) | tail
 
 status:
-	docker exec -it $$(docker-compose ps -q node1) nodetool status
+	docker exec -it $$(docker-compose ps -q node1) watch -n 0.5 nodetool status macpep
 
 app:
 	docker exec -it $$(docker-compose ps -q app) bash

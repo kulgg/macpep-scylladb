@@ -83,5 +83,7 @@ def test_digest():
 
     assert len(expected) == len(peptide_list)
 
+    peptides = [sequence for sequence, num in peptide_list]
+
     for peptide in expected:
-        assert peptide in peptide_list
+        assert peptide in peptides

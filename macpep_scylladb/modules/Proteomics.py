@@ -31,7 +31,7 @@ class Proteomics:
             minimum_peptide_length=3,
             maximum_peptide_length=60,
         ),
-    ) -> List[str]:
+    ) -> List[Tuple[str, int]]:
         peptides: Set[Tuple[str, int]] = set()
         protein_parts = enzyme.cleavage_regex.split(sequence)
         peptide_range = range(

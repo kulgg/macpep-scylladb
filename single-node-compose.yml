@@ -1,0 +1,8 @@
+version: "3"
+services:
+  node1:
+    image: scylladb/scylla
+    ports:
+      - "9042:9042"
+    restart: always
+    command: --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0

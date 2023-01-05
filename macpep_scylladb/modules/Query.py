@@ -7,21 +7,16 @@ from macpep_scylladb.modules.Proteomics import Proteomics
 
 
 class Query:
-    def __init__(self, proteomics: Proteomics, partitioner: Partitioner):
+    def __init__(
+        self,
+        proteomics: Proteomics,
+        partitioner: Partitioner,
+        partitions_file_path: str = "data/partitions_1000.txt",
+    ):
         self.proteomics = proteomics
         self.partitioner = partitioner
-        self.partitions = [
-            0,
-            644335421209,
-            961537885881,
-            1297732714404,
-            1660711111977,
-            2063197693248,
-            2519216181507,
-            3060541732774,
-            3737901303107,
-            4705032292661,
-        ]
+        with open(partitions_file_path) as f:
+            self.partitions = list(map(int, f.read().splitlines()))
 
     def peptides_by_sequence(self, server: str, sequence: str) -> List[Peptide]:
         connection.setup([server], "macpep")
