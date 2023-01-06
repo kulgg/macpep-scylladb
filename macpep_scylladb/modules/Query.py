@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List
 from cassandra.cqlengine import connection
 from macpep_scylladb.database.Peptide import Peptide
@@ -15,8 +16,10 @@ class Query:
     ):
         self.proteomics = proteomics
         self.partitioner = partitioner
-        with open(partitions_file_path) as f:
-            self.partitions = list(map(int, f.read().splitlines()))
+        self.partitions = []
+        if os.path.exists(partitions_file_path):
+            with open(partitions_file_path) as f:
+                self.partitions = list(map(int, f.read().splitlines()))
 
     def peptides_by_sequence(self, server: str, sequence: str) -> List[Peptide]:
         connection.setup([server], "macpep")
