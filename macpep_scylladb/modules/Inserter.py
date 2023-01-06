@@ -31,6 +31,9 @@ class Inserter:
         for peptide_sequence, num_of_missed_cleavages in self.proteomics.digest(
             protein.sequence
         ):
+            # any(review_statuses),
+            # # is_trembl when not all are true
+            # not all(review_statuses),
             mass = self.proteomics.calculate_mass(peptide_sequence)
             partition = self.partitioner.get_partition_index(self.partitions, mass)
             amino_acid_counter = Counter(peptide_sequence)
@@ -68,6 +71,10 @@ class Inserter:
                 z_count=amino_acid_counter["Z"],
                 n_terminus=ord(peptide_sequence[0]),
                 c_terminus=ord(peptide_sequence[-1]),
+                is_swiss_prot=protein.is_reviewed,
+                taxonomy_ids={protein.taxonomy_id},
+                unique_taxonomy_ids={},
+                proteome_ids={protein.proteome_id},
             )
             if not session:
                 cql.upsert_peptide(self.server, peptide)

@@ -75,7 +75,7 @@ class Cql:
 
     def upsert_peptides(self, session, peptides: List[Peptide]):
         # Using execute_concurrent with the same UPDATE statement that upsert_peptides uses under the hood is significantly faster
-        update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?, "is_metadata_up_to_date" = ? WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
+        update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?, "is_metadata_up_to_date" = ?, "taxonomy_ids" = "taxonomy_ids" + ?, "unique_taxonomy_ids" = "unique_taxonomy_ids" + ?, "proteome_ids" = "proteome_ids" + ?, "is_swiss_prot" = False, "is_trembl" = False WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
         update_statement = session.prepare(update_statement_str)
 
         statements_and_params = []
@@ -112,6 +112,10 @@ class Cql:
                 p.n_terminus,
                 p.c_terminus,
                 p.is_metadata_up_to_date,
+                p.taxonomy_ids,
+                p.unique_taxonomy_ids,
+                p.proteome_ids,
+                # ', "is_swiss_prot" = True ' if p.is_swiss_prot else "",
                 p.partition,
                 p.mass,
                 p.sequence,

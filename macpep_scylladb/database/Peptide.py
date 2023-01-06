@@ -39,3 +39,8 @@ class Peptide(Model):
     n_terminus = columns.SmallInt(required=True)
     c_terminus = columns.SmallInt(required=True)
     is_metadata_up_to_date = columns.Boolean(default=False, required=True)
+    is_swiss_prot = columns.Boolean(default=False, required=True)
+    is_trembl = columns.Boolean(default=False, required=True)
+    taxonomy_ids = columns.Set(columns.Integer, required=True, default=[])
+    unique_taxonomy_ids = columns.Set(columns.Integer, required=True, default=[])
+    proteome_ids = columns.Set(columns.Text, required=True, default=[])
