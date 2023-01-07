@@ -158,6 +158,7 @@ class Inserter:
         partitions_file_path: str,
         uniprot_file_path: str,
         use_concurrency=True,
+        num_threads: int = 14,
     ):
         self.server = server
         partitions_file = open(partitions_file_path, "r")
@@ -176,7 +177,7 @@ class Inserter:
 
         m = multiprocessing.Manager()
         queue = m.Queue()
-        num_worker_threads = 14
+        num_worker_threads = num_threads
         self.lock = threading.Lock()
         threads = []
         for _ in range(num_worker_threads):
