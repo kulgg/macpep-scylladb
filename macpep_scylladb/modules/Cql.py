@@ -76,15 +76,22 @@ class Cql:
 
     def upsert_peptides(self, session, peptides: List[Peptide]):
         # Using execute_concurrent with the same UPDATE statement that upsert_peptides uses under the hood is significantly faster
-        update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?, "is_metadata_up_to_date" = ?, "taxonomy_ids" = "taxonomy_ids" + ?, "unique_taxonomy_ids" = "unique_taxonomy_ids" + ?, "proteome_ids" = "proteome_ids" + ?, "is_swiss_prot" = False, "is_trembl" = False WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
+        update_statement_str = """UPDATE macpep.peptides SET "sequence" = ?, "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "is_metadata_up_to_date" = ?, "taxonomy_ids" = "taxonomy_ids" + ?, "unique_taxonomy_ids" = "unique_taxonomy_ids" + ?, "proteome_ids" = "proteome_ids" + ?, "is_swiss_prot" = False, "is_trembl" = False WHERE "partition" = ? AND "mass" = ? AND "a_count" = ? AND "b_count" = ? AND "c_count" = ? AND "d_count" = ? AND "e_count" = ? AND "f_count" = ? AND "g_count" = ? AND "h_count" = ? AND "i_count" = ? AND "j_count" = ? AND "k_count" = ? AND "l_count" = ? AND "m_count" = ? AND "n_count" = ? AND "o_count" = ? AND "p_count" = ? AND "q_count" = ? AND "r_count" = ? AND "s_count" = ? AND "t_count" = ? AND "u_count" = ? AND "v_count" = ? AND "w_count" = ? AND "y_count" = ? AND "z_count" = ? AND "n_terminus" = ? AND "c_terminus" = ?"""
         update_statement = session.prepare(update_statement_str)
 
         statements_and_params = []
         for p in peptides:
             params = (
+                p.sequence,
                 p.proteins,
                 p.length,
                 p.number_of_missed_cleavages,
+                p.is_metadata_up_to_date,
+                p.taxonomy_ids,
+                p.unique_taxonomy_ids,
+                p.proteome_ids,
+                p.partition,
+                p.mass,
                 p.a_count,
                 p.b_count,
                 p.c_count,
@@ -112,17 +119,10 @@ class Cql:
                 p.z_count,
                 p.n_terminus,
                 p.c_terminus,
-                p.is_metadata_up_to_date,
-                p.taxonomy_ids,
-                p.unique_taxonomy_ids,
-                p.proteome_ids,
-                # ', "is_swiss_prot" = True ' if p.is_swiss_prot else "",
-                p.partition,
-                p.mass,
-                p.sequence,
             )
             statements_and_params.append((update_statement, params))
 
+        # logging.info(statements_and_params)
         execute_concurrent(session, statements_and_params, raise_on_first_error=True)
 
     def upsert_peptide(self, server: str, p: Peptide):
@@ -133,11 +133,6 @@ class Cql:
         Peptide.objects(
             partition=p.partition,
             mass=p.mass,
-            sequence=p.sequence,
-        ).update(
-            proteins__add=p.proteins,
-            length=p.length,
-            number_of_missed_cleavages=p.number_of_missed_cleavages,
             a_count=p.a_count,
             b_count=p.b_count,
             c_count=p.c_count,
@@ -165,6 +160,11 @@ class Cql:
             z_count=p.z_count,
             n_terminus=p.n_terminus,
             c_terminus=p.c_terminus,
+        ).update(
+            sequence=p.sequence,
+            proteins__add=p.proteins,
+            length=p.length,
+            number_of_missed_cleavages=p.number_of_missed_cleavages,
             is_metadata_up_to_date=p.is_metadata_up_to_date,
         )
 
