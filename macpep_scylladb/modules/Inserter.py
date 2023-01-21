@@ -75,13 +75,13 @@ class Inserter:
             )
             if not session:
                 self.cql.upsert_peptide(self.server, peptide)
-                self.num_peptides += 1
+                self.num_processed_peptides += 1
             else:
                 peptides.append(peptide)
         if session:
             self.cql.upsert_peptides(session, peptides)
             with self.lock:
-                self.num_peptides += len(peptides)
+                self.num_processed_peptides += len(peptides)
 
     def _worker(self, queue):
         cluster = Cluster([self.server])
@@ -99,12 +99,12 @@ class Inserter:
         start_time = time.time()
         while not self.stopped:
             qsize = queue.qsize()
-            num_processed = self.num_proteins - qsize
+            num_processed = self.num_proteins_added_to_queue - qsize
             elapsed_time = time.time() - start_time
             items_per_second = num_processed / elapsed_time
             self.bar.suffix = (
-                f"{num_processed}/{self.num_lines} Proteins {items_per_second:.2f}P/sec"
-                f" {self.num_peptides} Peptides"
+                f"{num_processed}/{self.num_total_proteins} Proteins"
+                f" {items_per_second:.2f}P/sec {self.num_processed_peptides} Peptides"
             )
             self.bar.next(num_processed - old_num_processed)
             old_num_processed = num_processed
@@ -122,24 +122,24 @@ class Inserter:
         uniprot_f = open(uniprot_file_path, "r")
         reader = UniprotTextReader(uniprot_f)
 
-        self.num_proteins = 0
-        self.num_peptides = 0
+        self.num_proteins_added_to_queue = 0
+        self.num_processed_peptides = 0
 
         start_time = time.time()
         for protein in reader:
-            self.num_proteins += 1
+            self.num_proteins_added_to_queue += 1
             protein_db = to_database(protein)
             self.cql.insert_protein(server, protein_db)
             self._process_peptides(protein)
             elapsed_time = time.time() - start_time
-            items_per_second = self.num_proteins / elapsed_time
+            items_per_second = self.num_proteins_added_to_queue / elapsed_time
             bar.suffix = (
-                f"{self.num_proteins}/{num_lines} {items_per_second:.2f} proteins/sec"
+                f"{self.num_proteins_added_to_queue}/{num_lines} {items_per_second:.2f} proteins/sec"
             )
             bar.next()
 
-        logging.info("Number of proteins: %d", self.num_proteins)
-        logging.info("Number of peptides: %d", self.num_peptides)
+        logging.info("Number of proteins: %d", self.num_proteins_added_to_queue)
+        logging.info("Number of peptides: %d", self.num_processed_peptides)
 
         uniprot_f.close()
 
@@ -155,15 +155,15 @@ class Inserter:
         self.partitions = list(map(int, partitions_file.read().splitlines()))
         partitions_file.close()
         uniprot_f = open(uniprot_file_path, "r")
-        self.num_lines = sum(
+        self.num_total_proteins = sum(
             1 for line in open(uniprot_file_path) if line.startswith("//")
         )
-        self.bar = Bar("Processing", max=self.num_lines)
-        logging.info("Total proteins: %d", self.num_lines)
+        self.bar = Bar("Processing", max=self.num_total_proteins)
+        logging.info("Total proteins: %d", self.num_total_proteins)
         reader = UniprotTextReader(uniprot_f)
 
-        self.num_proteins = 0
-        self.num_peptides = 0
+        self.num_proteins_added_to_queue = 0
+        self.num_processed_peptides = 0
 
         m = multiprocessing.Manager()
         queue = m.Queue()
@@ -182,7 +182,7 @@ class Inserter:
         progress_logger.start()
 
         for protein in reader:
-            self.num_proteins += 1
+            self.num_proteins_added_to_queue += 1
             self.cql.insert_protein(self.server, to_database(protein))
             queue.put(protein)
 
@@ -195,7 +195,7 @@ class Inserter:
         self.stopped = True
         progress_logger.join()
 
-        logging.info("Number of proteins: %d", self.num_proteins)
-        logging.info("Number of peptides: %d", self.num_peptides)
+        logging.info("Number of proteins: %d", self.num_proteins_added_to_queue)
+        logging.info("Number of peptides: %d", self.num_processed_peptides)
 
         uniprot_f.close()
