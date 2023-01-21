@@ -1,4 +1,5 @@
 from collections import Counter
+import csv
 import logging
 import time
 from progress.bar import Bar
@@ -110,6 +111,42 @@ class Inserter:
             old_num_processed = num_processed
             sleep(0.1)
 
+    def _performance_logger(self, queue, T):
+        with open("data/insertion_performance.csv", "w") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                ["seconds", "processed_proteins", "processed_peptides", "proteins/sec"]
+            )
+
+            start_time = time.time()
+            prev_time = time.time()
+            prev_num_processed_proteins = 0
+            i = 0
+
+            while not self.stopped:
+                if i == T:
+                    now = time.time()
+                    elapsed_secs = int(now - prev_time)
+                    qsize = queue.qsize()
+                    num_processed_proteins = self.num_proteins_added_to_queue - qsize
+                    proteins_per_sec = (
+                        num_processed_proteins - prev_num_processed_proteins
+                    ) / elapsed_secs
+
+                    writer.writerow(
+                        [
+                            int(now - start_time),
+                            num_processed_proteins,
+                            self.num_processed_peptides,
+                            proteins_per_sec,
+                        ]
+                    )
+                    prev_time = now
+                    prev_num_processed_proteins = num_processed_proteins
+                    i = 0
+                i += 1
+                sleep(1)
+
     def run_serial(
         self, server: str, partitions_file_path: str, uniprot_file_path: str
     ):
@@ -149,6 +186,7 @@ class Inserter:
         partitions_file_path: str,
         uniprot_file_path: str,
         num_threads: int = 14,
+        performance_log_interval: int = 60,
     ):
         self.server = server
         partitions_file = open(partitions_file_path, "r")
@@ -181,12 +219,21 @@ class Inserter:
         )
         progress_logger.start()
 
+        performance_logger = threading.Thread(
+            target=self._performance_logger,
+            args=(
+                queue,
+                performance_log_interval,
+            ),
+        )
+        performance_logger.start()
+
         for protein in reader:
             self.num_proteins_added_to_queue += 1
             self.cql.insert_protein(self.server, to_database(protein))
             queue.put(protein)
 
-        for _ in range(num_worker_threads + 1):
+        for _ in range(1000):
             queue.put(None)
 
         for thread in threads:
@@ -194,6 +241,7 @@ class Inserter:
 
         self.stopped = True
         progress_logger.join()
+        performance_logger.join()
 
         logging.info("Number of proteins: %d", self.num_proteins_added_to_queue)
         logging.info("Number of peptides: %d", self.num_processed_peptides)
