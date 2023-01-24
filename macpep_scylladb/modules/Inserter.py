@@ -115,12 +115,19 @@ class Inserter:
         with open("data/insertion_performance.csv", "w") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
-                ["seconds", "processed_proteins", "processed_peptides", "proteins/sec"]
+                [
+                    "seconds",
+                    "processed_proteins",
+                    "processed_peptides",
+                    "proteins/sec",
+                    "peptides/sec",
+                ]
             )
 
             start_time = time.time()
             prev_time = time.time()
             prev_num_processed_proteins = 0
+            prev_num_processed_peptides = 0
             i = 0
 
             while not self.stopped:
@@ -132,6 +139,9 @@ class Inserter:
                     proteins_per_sec = (
                         num_processed_proteins - prev_num_processed_proteins
                     ) / elapsed_secs
+                    peptides_per_sec = (
+                        self.num_processed_peptides - prev_num_processed_peptides
+                    ) / elapsed_secs
 
                     writer.writerow(
                         [
@@ -139,10 +149,12 @@ class Inserter:
                             num_processed_proteins,
                             self.num_processed_peptides,
                             proteins_per_sec,
+                            peptides_per_sec,
                         ]
                     )
                     prev_time = now
                     prev_num_processed_proteins = num_processed_proteins
+                    prev_num_processed_peptides = self.num_processed_peptides
                     i = 0
                 i += 1
                 sleep(1)
