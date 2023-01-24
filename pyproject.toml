@@ -17,6 +17,8 @@ cassandra-driver = "^3.25.0"
 sortedcontainers = "^2.4.0"
 progress = "^1.6"
 xxhash = "^3.2.0"
+pandas = "^1.5.3"
+matplotlib = "^3.6.3"
 
 [tool.poetry.group.dev.dependencies]
 testfixtures = "^7.0.1"
