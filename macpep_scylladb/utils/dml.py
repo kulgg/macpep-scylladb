@@ -5,6 +5,8 @@ from cassandra.concurrent import execute_concurrent
 from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.database.Protein import Protein
 from cassandra.cluster import Session
+from cassandra import ConsistencyLevel
+from cassandra.policies import RetryPolicy
 
 
 def insert_proteins(session, proteins: List[Protein]):
@@ -32,7 +34,11 @@ def insert_proteins(session, proteins: List[Protein]):
 def batch_upsert_peptides(session: Session, peptides: List[Peptide]):
     update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?  WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
     update_statement = session.prepare(update_statement_str)
-    batch = BatchStatement(BatchType.UNLOGGED)
+    batch = BatchStatement(
+        BatchType.UNLOGGED,
+        retry_policy=RetryPolicy.RETRY_NEXT_HOST,
+        consistency_level=ConsistencyLevel.ONE,
+    )
 
     for p in peptides:
         params = (
