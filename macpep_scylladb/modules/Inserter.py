@@ -178,6 +178,7 @@ class Inserter:
         num_worker_processes: int = 14,
         performance_log_interval: int = 60,
         num_insert_threshold: int = 10000,
+        max_protein_queue_size: int = 2000,
     ):
         self.server = server
         partitions_file = open(partitions_file_path, "r")
@@ -234,14 +235,15 @@ class Inserter:
         session = cluster.connect("macpep")
 
         for protein in reader:
+            if protein_queue.qsize() > max_protein_queue_size:
+                sleep(0.1)
+                continue
             self.num_proteins_added_to_queue += 1
             protein_list.append(protein)
             protein_queue.put(protein)
             if len(protein_list) > 500:
                 insert_proteins(session, protein_list)
                 protein_list = []
-            if protein_queue.qsize() > 2000:
-                sleep(1)
 
         insert_proteins(session, protein_list)
 
