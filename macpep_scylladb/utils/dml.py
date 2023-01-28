@@ -6,7 +6,7 @@ from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.database.Protein import Protein
 from cassandra.cluster import Session
 from cassandra import ConsistencyLevel
-from cassandra.policies import RetryPolicy
+from cassandra.policies import ConstantReconnectionPolicy
 
 
 def insert_proteins(session, proteins: List[Protein]):
@@ -36,7 +36,7 @@ def batch_upsert_peptides(session: Session, peptides: List[Peptide]):
     update_statement = session.prepare(update_statement_str)
     batch = BatchStatement(
         BatchType.UNLOGGED,
-        retry_policy=RetryPolicy.RETRY_NEXT_HOST,
+        retry_policy=ConstantReconnectionPolicy(0.1),
         consistency_level=ConsistencyLevel.ONE,
     )
 
