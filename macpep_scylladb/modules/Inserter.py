@@ -94,10 +94,7 @@ class Inserter:
         num_peptides_processed.value += len(peptide_list)
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
-        cluster = Cluster(
-            [self.server],
-            default_retry_policy=GeniusRetryPolicy(),
-        )
+        cluster = Cluster([random.choice(self.server)])
         session = cluster.connect("macpep")
         session.default_timeout = 30
 
@@ -193,8 +190,7 @@ class Inserter:
         num_insert_threshold: int = 10000,
         max_protein_queue_size: int = 2000,
     ):
-        servers = [server.split(",")]
-        self.server = random.choice(servers)
+        self.server = server.split(",")
         partitions_file = open(partitions_file_path, "r")
         self.partitions = list(map(int, partitions_file.read().splitlines()))
         partitions_file.close()
@@ -245,7 +241,7 @@ class Inserter:
         performance_logger.start()
 
         protein_list = []
-        cluster = Cluster([self.server])
+        cluster = Cluster([random.choice(self.server)])
         session = cluster.connect("macpep")
 
         for protein in reader:
