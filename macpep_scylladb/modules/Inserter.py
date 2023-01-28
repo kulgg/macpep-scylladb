@@ -13,7 +13,11 @@ from macpep_scylladb.models.Protein import Protein
 from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
-from macpep_scylladb.utils.dml import batch_upsert_peptides, insert_proteins
+from macpep_scylladb.utils.dml import (
+    batch_upsert_peptides,
+    insert_proteins,
+    upsert_peptides,
+)
 
 
 class Inserter:
@@ -77,12 +81,13 @@ class Inserter:
         return peptides
 
     def _upsert_peptides(self, session, peptide_list, num_peptides_processed):
-        peptides = defaultdict(list)
-        for p in peptide_list:
-            peptides[p.partition].append(p)
-        for ps in peptides.values():
-            batch_upsert_peptides(session, ps)
-        num_peptides_processed.value += len(peptide_list)
+        upsert_peptides(session, peptide_list)
+        # peptides = defaultdict(list)
+        # for p in peptide_list:
+        #     peptides[p.partition].append(p)
+        # for ps in peptides.values():
+        #     batch_upsert_peptides(session, ps)
+        # num_peptides_processed.value += len(peptide_list)
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
         cluster = Cluster([self.server])
