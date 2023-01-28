@@ -96,7 +96,7 @@ def batch_upsert_peptides(session: Session, peptides: List[Peptide]):
     session.execute(batch)
 
 
-def upsert_peptides(session, peptides: List[Peptide]):
+def upsert_peptides(session: Session, peptides: List[Peptide]):
     # Using execute_concurrent with the same UPDATE statement that upsert_peptides uses under the hood is significantly faster
     update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?  WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
     update_statement = session.prepare(update_statement_str)

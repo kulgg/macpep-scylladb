@@ -92,6 +92,7 @@ class Inserter:
     def _worker(self, protein_queue, threshold, num_peptides_processed):
         cluster = Cluster([self.server])
         session = cluster.connect("macpep")
+        session.default_timeout = 30
 
         peptide_list = []
 
