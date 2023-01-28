@@ -138,8 +138,8 @@ class Inserter:
             prev_num_processed_peptides = 0
             i = 0
 
-            while not self.stopped:
-                if i == T:
+            while True:
+                if i == T or self.stopped:
                     now = time.time()
                     elapsed_secs = int(now - prev_time)
                     qsize = queue.qsize()
@@ -164,6 +164,9 @@ class Inserter:
                     prev_num_processed_proteins = num_processed_proteins
                     prev_num_processed_peptides = self.num_processed_peptides
                     i = 0
+
+                    if self.stopped:
+                        break
                 i += 1
                 sleep(1)
 
