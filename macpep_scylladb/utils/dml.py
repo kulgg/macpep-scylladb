@@ -6,7 +6,17 @@ from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.database.Protein import Protein
 from cassandra.cluster import Session
 from cassandra import ConsistencyLevel
-from cassandra.policies import ConstantReconnectionPolicy
+from cassandra.policies import FallthroughRetryPolicy
+
+
+class GeniusRetryPolicy(FallthroughRetryPolicy):
+    """
+    A retry policy that never retries and always propagates failures to
+    the application.
+    """
+
+    def on_write_timeout(self, *args, **kwargs):
+        return self.RETRY_NEXT_HOST, None
 
 
 def insert_proteins(session, proteins: List[Protein]):
@@ -36,7 +46,7 @@ def batch_upsert_peptides(session: Session, peptides: List[Peptide]):
     update_statement = session.prepare(update_statement_str)
     batch = BatchStatement(
         BatchType.UNLOGGED,
-        retry_policy=ConstantReconnectionPolicy(0.1),
+        retry_policy=GeniusRetryPolicy(),
         consistency_level=ConsistencyLevel.ONE,
     )
 
