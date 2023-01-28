@@ -179,7 +179,7 @@ class Inserter:
 
     def run_multi(
         self,
-        server: List[str],
+        server: str,
         partitions_file_path: str,
         uniprot_file_path: str,
         num_worker_processes: int = 14,
@@ -187,7 +187,7 @@ class Inserter:
         num_insert_threshold: int = 10000,
         max_protein_queue_size: int = 2000,
     ):
-        self.server = server
+        self.server = server.split(",")
         partitions_file = open(partitions_file_path, "r")
         self.partitions = list(map(int, partitions_file.read().splitlines()))
         partitions_file.close()
@@ -268,3 +268,7 @@ class Inserter:
         logging.info("Number of peptides: %d", num_peptides_processed)
 
         uniprot_f.close()
+
+    def a(self, list: List[str]):
+        logging.info(list)
+        logging.info(type(list).__name__)
