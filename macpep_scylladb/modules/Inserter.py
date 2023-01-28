@@ -1,6 +1,7 @@
 from collections import Counter, defaultdict
 import csv
 import logging
+import random
 import time
 from typing import List
 from progress.bar import Bar
@@ -94,9 +95,8 @@ class Inserter:
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
         cluster = Cluster(
-            self.server,
+            [self.server],
             default_retry_policy=GeniusRetryPolicy(),
-            load_balancing_policy=DCAwareRoundRobinPolicy(local_dc="macpep_dc"),
         )
         session = cluster.connect("macpep")
         session.default_timeout = 30
@@ -193,7 +193,8 @@ class Inserter:
         num_insert_threshold: int = 10000,
         max_protein_queue_size: int = 2000,
     ):
-        self.server = server.split(",")
+        servers = [server.split(",")]
+        self.server = random.choice(servers)
         partitions_file = open(partitions_file_path, "r")
         self.partitions = list(map(int, partitions_file.read().splitlines()))
         partitions_file.close()
