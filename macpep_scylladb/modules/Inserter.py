@@ -2,6 +2,7 @@ from collections import Counter, defaultdict
 import csv
 import logging
 import time
+from typing import List
 from progress.bar import Bar
 import multiprocessing
 import threading
@@ -81,12 +82,12 @@ class Inserter:
         return peptides
 
     def _upsert_peptides(self, session, peptide_list, num_peptides_processed):
-        upsert_peptides(session, peptide_list)
-        # peptides = defaultdict(list)
-        # for p in peptide_list:
-        #     peptides[p.partition].append(p)
-        # for ps in peptides.values():
-        #     batch_upsert_peptides(session, ps)
+        # upsert_peptides(session, peptide_list)
+        peptides = defaultdict(list)
+        for p in peptide_list:
+            peptides[p.partition].append(p)
+        for ps in peptides.values():
+            batch_upsert_peptides(session, ps)
         num_peptides_processed.value += len(peptide_list)
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
@@ -178,7 +179,7 @@ class Inserter:
 
     def run_multi(
         self,
-        server: str,
+        server: List[str],
         partitions_file_path: str,
         uniprot_file_path: str,
         num_worker_processes: int = 14,
