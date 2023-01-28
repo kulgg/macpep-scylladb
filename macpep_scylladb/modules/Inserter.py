@@ -15,10 +15,12 @@ from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
 from macpep_scylladb.utils.dml import (
+    GeniusRetryPolicy,
     batch_upsert_peptides,
     insert_proteins,
     upsert_peptides,
 )
+from cassandra.policies import DCAwareRoundRobinPolicy
 
 
 class Inserter:
@@ -91,7 +93,11 @@ class Inserter:
         num_peptides_processed.value += len(peptide_list)
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
-        cluster = Cluster(self.server)
+        cluster = Cluster(
+            self.server,
+            default_retry_policy=GeniusRetryPolicy(),
+            load_balancing_policy=DCAwareRoundRobinPolicy(local_dc="macpep_dc"),
+        )
         session = cluster.connect("macpep")
         session.default_timeout = 30
 
