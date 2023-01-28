@@ -17,7 +17,7 @@ class Commands:
         self.partitioner = Partitioner(self.proteomics)
         self.cql = Cql()
         self.query = Query(self.proteomics, self.partitioner)
-        self.inserter = Inserter(self.partitioner, self.proteomics, self.cql)
+        self.inserter = Inserter(self.partitioner, self.proteomics)
         self.plots = Plots()
 
 
