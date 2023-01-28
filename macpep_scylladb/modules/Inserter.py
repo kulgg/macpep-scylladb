@@ -87,7 +87,7 @@ class Inserter:
         #     peptides[p.partition].append(p)
         # for ps in peptides.values():
         #     batch_upsert_peptides(session, ps)
-        # num_peptides_processed.value += len(peptide_list)
+        num_peptides_processed.value += len(peptide_list)
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
         cluster = Cluster([self.server])
