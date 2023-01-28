@@ -94,7 +94,7 @@ class Inserter:
         num_peptides_processed.value += len(peptide_list)
 
     def _worker(self, protein_queue, threshold, num_peptides_processed):
-        cluster = Cluster([random.choice(self.server)])
+        cluster = Cluster(self.server)
         session = cluster.connect("macpep")
         session.default_timeout = 30
 
@@ -241,7 +241,7 @@ class Inserter:
         performance_logger.start()
 
         protein_list = []
-        cluster = Cluster([random.choice(self.server)])
+        cluster = Cluster(self.server)
         session = cluster.connect("macpep")
 
         for protein in reader:
