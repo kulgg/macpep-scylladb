@@ -89,22 +89,22 @@ class Inserter:
     def _upsert_peptides(
         self, session, peptide_list, num_peptides_processed, sleep_after_timeout
     ):
-        peptides = defaultdict(list)
-        for p in peptide_list:
-            peptides[p.partition].append(p)
-        added = set()
+        # peptides = defaultdict(list)
+        # for p in peptide_list:
+        #     peptides[p.partition].append(p)
+        # added = set()
         timeout = sleep_after_timeout
         while True:
             try:
-                # upsert_peptides(session, peptide_list)
-                for ps in peptides.values():
-                    if ps[0].partition in added:
-                        continue
-                    batch_upsert_peptides(session, ps)
-                    added.add(ps[0].partition)
+                upsert_peptides(session, peptide_list)
+                # for ps in peptides.values():
+                #     if ps[0].partition in added:
+                #         continue
+                #     batch_upsert_peptides(session, ps)
+                #     added.add(ps[0].partition)
                 timeout = sleep_after_timeout
                 break
-            except Exception:
+            except (WriteTimeout, NoHostAvailable):
                 sleep(timeout)
                 timeout *= 2
 
@@ -207,6 +207,17 @@ class Inserter:
                 i += 1
                 sleep(1)
 
+    def _insert_proteins(self, session, proteins, sleep_after_timeout):
+        timeout = sleep_after_timeout
+        while True:
+            try:
+                insert_proteins(session, proteins)
+                timeout = sleep_after_timeout
+                break
+            except (WriteTimeout, NoHostAvailable):
+                sleep(timeout)
+                timeout *= 2
+
     def run_multi(
         self,
         server: str,
@@ -281,11 +292,11 @@ class Inserter:
             self.num_proteins_added_to_queue += 1
             protein_list.append(protein)
             protein_queue.put(protein)
-            if len(protein_list) > 500:
-                insert_proteins(session, protein_list)
+            if len(protein_list) >= 100:
+                self._insert_proteins(session, protein_list, sleep_after_timeout)
                 protein_list = []
 
-        insert_proteins(session, protein_list)
+        self._insert_proteins(session, protein_list, sleep_after_timeout)
 
         for _ in range(1000):
             protein_queue.put(None)
