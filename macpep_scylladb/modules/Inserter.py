@@ -116,9 +116,7 @@ class Inserter:
 
         return list(filter(lambda x: (x.partition not in added), peptide_list))
 
-    def _worker(
-        self, protein_queue, threshold, num_peptides_processed, sleep_after_timeout
-    ):
+    def _worker(self, protein_queue, num_peptides_processed, sleep_after_timeout):
         cluster = Cluster(self.server)
         session = cluster.connect("macpep")
         session.default_timeout = 30
@@ -134,11 +132,9 @@ class Inserter:
             peptide_list.extend(self._process_peptides(protein))
 
             if i > 10:
-                tmp = len(peptide_list)
                 peptide_list = self._upsert_peptides(
                     session, peptide_list, num_peptides_processed, sleep_after_timeout
                 )
-                logging.info("Inserted %d", tmp - len(peptide_list))
                 i = 0
             i += 1
 
@@ -240,7 +236,6 @@ class Inserter:
         uniprot_file_path: str,
         num_worker_processes: int = 14,
         performance_log_interval: int = 60,
-        num_insert_threshold: int = 10000,
         max_protein_queue_size: int = 2000,
         sleep_after_timeout: float = 0.0,
     ):
@@ -269,7 +264,6 @@ class Inserter:
                 target=self._worker,
                 args=(
                     protein_queue,
-                    num_insert_threshold,
                     num_peptides_processed,
                     sleep_after_timeout,
                 ),
