@@ -105,7 +105,6 @@ class Inserter:
                     if ps[0].partition in added:
                         continue
                     if len(ps) >= 100 or force_insert:
-                        logging.info("Inserting partition %d", ps[0].partition)
                         batch_upsert_peptides(session, ps)
                         added.add(ps[0].partition)
                         num_peptides_processed.value += len(ps)
@@ -134,12 +133,12 @@ class Inserter:
                 break
             peptide_list.extend(self._process_peptides(protein))
 
-            if i > 100:
+            if i > 1000:
                 tmp = len(peptide_list)
                 peptide_list = self._upsert_peptides(
                     session, peptide_list, num_peptides_processed, sleep_after_timeout
                 )
-                logging.info("Inserted %d", len(peptide_list) - tmp)
+                logging.info("Inserted %d", tmp - len(peptide_list))
                 i = 0
             i += 1
 
