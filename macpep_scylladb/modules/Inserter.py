@@ -23,6 +23,7 @@ from macpep_scylladb.utils.dml import (
 )
 from cassandra.policies import DCAwareRoundRobinPolicy
 from cassandra import WriteTimeout
+from cassandra.cluster import NoHostAvailable
 
 
 class Inserter:
@@ -92,6 +93,7 @@ class Inserter:
         for p in peptide_list:
             peptides[p.partition].append(p)
         added = set()
+        timeout = sleep_after_timeout
         while True:
             try:
                 # upsert_peptides(session, peptide_list)
@@ -100,9 +102,11 @@ class Inserter:
                         continue
                     batch_upsert_peptides(session, ps)
                     added.add(ps[0].partition)
+                timeout = sleep_after_timeout
                 break
-            except WriteTimeout:
-                time.sleep(sleep_after_timeout)
+            except WriteTimeout or NoHostAvailable:
+                sleep(timeout)
+                timeout *= 2
 
         num_peptides_processed.value += len(peptide_list)
 
