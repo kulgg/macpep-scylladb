@@ -89,19 +89,19 @@ class Inserter:
     def _upsert_peptides(
         self, session, peptide_list, num_peptides_processed, sleep_after_timeout
     ):
-        # peptides = defaultdict(list)
-        # for p in peptide_list:
-        #     peptides[p.partition].append(p)
-        # added = set()
+        peptides = defaultdict(list)
+        for p in peptide_list:
+            peptides[p.partition].append(p)
+        added = set()
         timeout = sleep_after_timeout
         while True:
             try:
-                upsert_peptides(session, peptide_list)
-                # for ps in peptides.values():
-                #     if ps[0].partition in added:
-                #         continue
-                #     batch_upsert_peptides(session, ps)
-                #     added.add(ps[0].partition)
+                # upsert_peptides(session, peptide_list)
+                for ps in peptides.values():
+                    if ps[0].partition in added:
+                        continue
+                    batch_upsert_peptides(session, ps)
+                    added.add(ps[0].partition)
                 timeout = sleep_after_timeout
                 break
             except (WriteTimeout, NoHostAvailable):
