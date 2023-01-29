@@ -22,6 +22,7 @@ from macpep_scylladb.utils.dml import (
     upsert_peptides,
 )
 from cassandra.policies import DCAwareRoundRobinPolicy
+from cassandra import WriteTimeout
 
 
 class Inserter:
@@ -85,7 +86,13 @@ class Inserter:
         return peptides
 
     def _upsert_peptides(self, session, peptide_list, num_peptides_processed):
-        upsert_peptides(session, peptide_list)
+        while True:
+            try:
+                upsert_peptides(session, peptide_list)
+                break
+            except WriteTimeout:
+                time.sleep(0.2)
+
         # peptides = defaultdict(list)
         # for p in peptide_list:
         #     peptides[p.partition].append(p)
@@ -278,6 +285,21 @@ class Inserter:
 
         uniprot_f.close()
 
-    def a(self, list: List[str]):
-        logging.info(list)
-        logging.info(type(list).__name__)
+    def do(self, i):
+        logging.info(i)
+        if i == 3:
+            return "done"
+
+        raise Exception("Fail")
+
+    def a(self):
+        i = 0
+        while True:
+            try:
+                logging.info("Calling")
+                logging.info(self.do(i))
+                break
+            except:
+                i += 1
+                sleep(0.1)
+                continue
