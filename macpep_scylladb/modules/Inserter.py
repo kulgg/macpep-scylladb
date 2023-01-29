@@ -85,15 +85,15 @@ class Inserter:
         return peptides
 
     def _upsert_peptides(self, session, peptide_list, num_peptides_processed):
-        # upsert_peptides(session, peptide_list)
-        peptides = defaultdict(list)
-        for p in peptide_list:
-            peptides[p.partition].append(p)
-        for ps in peptides.values():
-            batch_upsert_peptides(session, ps)
+        upsert_peptides(session, peptide_list)
+        # peptides = defaultdict(list)
+        # for p in peptide_list:
+        #     peptides[p.partition].append(p)
+        # for ps in peptides.values():
+        #     batch_upsert_peptides(session, ps)
         num_peptides_processed.value += len(peptide_list)
 
-    def _worker(self, protein_queue, threshold, num_peptides_processed):
+    def _worker(self, protein_queue, threshold, num_peptides_processed, timeout):
         cluster = Cluster(self.server)
         session = cluster.connect("macpep")
         session.default_timeout = 30
@@ -109,24 +109,28 @@ class Inserter:
             if len(peptide_list) > threshold:
                 self._upsert_peptides(session, peptide_list, num_peptides_processed)
                 peptide_list = []
+            sleep(timeout)
 
         self._upsert_peptides(session, peptide_list)
         cluster.shutdown()
 
     def _progress_worker(self, queue, num_peptides_processed):
-        old_num_processed = 0
+        old_num_proteins_processed = 0
         start_time = time.time()
         while not self.stopped:
             qsize = queue.qsize()
-            num_processed = self.num_proteins_added_to_queue - qsize
+            num_proteins_processed = self.num_proteins_added_to_queue - qsize
             elapsed_time = time.time() - start_time
-            items_per_second = num_processed / elapsed_time
+            proteins_per_second = num_proteins_processed / elapsed_time
+            peptides_per_second = num_peptides_processed.value / elapsed_time
             self.bar.suffix = (
-                f"{num_processed}/{self.num_total_proteins} Proteins"
-                f" {items_per_second:.2f}P/sec {num_peptides_processed.value} Peptides"
+                f"{num_proteins_processed}/{self.num_total_proteins} Proteins"
+                f" {proteins_per_second:.0f}P/sec"
+                f" {peptides_per_second:.0f}Pep/sec"
+                f" {num_peptides_processed.value} Peptides"
             )
-            self.bar.next(num_processed - old_num_processed)
-            old_num_processed = num_processed
+            self.bar.next(num_proteins_processed - old_num_proteins_processed)
+            old_num_proteins_processed = num_proteins_processed
             sleep(0.1)
 
     def _performance_logger(self, queue, T):
@@ -189,6 +193,7 @@ class Inserter:
         performance_log_interval: int = 60,
         num_insert_threshold: int = 10000,
         max_protein_queue_size: int = 2000,
+        timeout: float = 0.0,
     ):
         self.server = server.split(",")
         partitions_file = open(partitions_file_path, "r")
@@ -217,6 +222,7 @@ class Inserter:
                     protein_queue,
                     num_insert_threshold,
                     num_peptides_processed,
+                    timeout,
                 ),
             )
             p.start()
