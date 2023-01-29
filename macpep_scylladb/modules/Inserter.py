@@ -133,7 +133,7 @@ class Inserter:
                 break
             peptide_list.extend(self._process_peptides(protein))
 
-            if i > 100:
+            if i > 10:
                 tmp = len(peptide_list)
                 peptide_list = self._upsert_peptides(
                     session, peptide_list, num_peptides_processed, sleep_after_timeout
