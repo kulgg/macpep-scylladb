@@ -85,22 +85,30 @@ class Inserter:
             peptides.append(peptide)
         return peptides
 
-    def _upsert_peptides(self, session, peptide_list, num_peptides_processed):
+    def _upsert_peptides(
+        self, session, peptide_list, num_peptides_processed, sleep_after_timeout
+    ):
+        peptides = defaultdict(list)
+        for p in peptide_list:
+            peptides[p.partition].append(p)
+        added = set()
         while True:
             try:
-                upsert_peptides(session, peptide_list)
+                # upsert_peptides(session, peptide_list)
+                for ps in peptides.values():
+                    if ps[0].partition in added:
+                        continue
+                    batch_upsert_peptides(session, ps)
+                    added.add(ps[0].partition)
                 break
             except WriteTimeout:
-                time.sleep(0.2)
+                time.sleep(sleep_after_timeout)
 
-        # peptides = defaultdict(list)
-        # for p in peptide_list:
-        #     peptides[p.partition].append(p)
-        # for ps in peptides.values():
-        #     batch_upsert_peptides(session, ps)
         num_peptides_processed.value += len(peptide_list)
 
-    def _worker(self, protein_queue, threshold, num_peptides_processed, timeout):
+    def _worker(
+        self, protein_queue, threshold, num_peptides_processed, sleep_after_timeout
+    ):
         cluster = Cluster(self.server)
         session = cluster.connect("macpep")
         session.default_timeout = 30
@@ -114,11 +122,14 @@ class Inserter:
             peptide_list.extend(self._process_peptides(protein))
 
             if len(peptide_list) > threshold:
-                self._upsert_peptides(session, peptide_list, num_peptides_processed)
+                self._upsert_peptides(
+                    session, peptide_list, num_peptides_processed, sleep_after_timeout
+                )
                 peptide_list = []
-            sleep(timeout)
 
-        self._upsert_peptides(session, peptide_list)
+        self._upsert_peptides(
+            session, peptide_list, num_peptides_processed, sleep_after_timeout
+        )
         cluster.shutdown()
 
     def _progress_worker(self, queue, num_peptides_processed):
@@ -200,7 +211,7 @@ class Inserter:
         performance_log_interval: int = 60,
         num_insert_threshold: int = 10000,
         max_protein_queue_size: int = 2000,
-        timeout: float = 0.0,
+        sleep_after_timeout: float = 0.0,
     ):
         self.server = server.split(",")
         partitions_file = open(partitions_file_path, "r")
@@ -229,7 +240,7 @@ class Inserter:
                     protein_queue,
                     num_insert_threshold,
                     num_peptides_processed,
-                    timeout,
+                    sleep_after_timeout,
                 ),
             )
             p.start()
