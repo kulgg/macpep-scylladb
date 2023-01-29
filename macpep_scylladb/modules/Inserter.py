@@ -117,6 +117,8 @@ class Inserter:
                 sleep(timeout)
                 timeout *= 2
 
+        return list(filter(lambda x: (x.partition not in added), peptide_list))
+
     def _worker(
         self, protein_queue, threshold, num_peptides_processed, sleep_after_timeout
     ):
@@ -135,10 +137,9 @@ class Inserter:
             peptide_list.extend(self._process_peptides(protein))
 
             if i > 100:
-                self._upsert_peptides(
+                peptide_list = self._upsert_peptides(
                     session, peptide_list, num_peptides_processed, sleep_after_timeout
                 )
-                peptide_list = []
                 i = 0
             i += 1
 
