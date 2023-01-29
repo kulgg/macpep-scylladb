@@ -104,7 +104,7 @@ class Inserter:
                     added.add(ps[0].partition)
                 timeout = sleep_after_timeout
                 break
-            except (WriteTimeout, NoHostAvailable):
+            except Exception:
                 sleep(timeout)
                 timeout *= 2
 
@@ -155,7 +155,7 @@ class Inserter:
             old_num_proteins_processed = num_proteins_processed
             sleep(0.1)
 
-    def _performance_logger(self, queue, T):
+    def _performance_logger(self, queue, T, num_peptides_processed):
         with open("data/insertion_performance.csv", "w") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
@@ -179,26 +179,27 @@ class Inserter:
                     now = time.time()
                     elapsed_secs = int(now - prev_time)
                     qsize = queue.qsize()
+                    npp = num_peptides_processed.value
                     num_processed_proteins = self.num_proteins_added_to_queue - qsize
                     proteins_per_sec = (
                         num_processed_proteins - prev_num_processed_proteins
                     ) / elapsed_secs
                     peptides_per_sec = (
-                        self.num_processed_peptides - prev_num_processed_peptides
+                        npp - prev_num_processed_peptides
                     ) / elapsed_secs
 
                     writer.writerow(
                         [
                             int(now - start_time),
                             num_processed_proteins,
-                            self.num_processed_peptides,
+                            npp,
                             proteins_per_sec,
                             peptides_per_sec,
                         ]
                     )
                     prev_time = now
                     prev_num_processed_proteins = num_processed_proteins
-                    prev_num_processed_peptides = self.num_processed_peptides
+                    prev_num_processed_peptides = npp
                     i = 0
 
                     if self.stopped:
@@ -264,6 +265,7 @@ class Inserter:
             args=(
                 protein_queue,
                 performance_log_interval,
+                num_peptides_processed,
             ),
         )
         performance_logger.start()
