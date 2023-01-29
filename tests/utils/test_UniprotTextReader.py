@@ -1,4 +1,4 @@
-from macpep_scylladb.models.Protein import Protein
+from macpep_scylladb.database.Protein import Protein
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
 from testfixtures import compare
 

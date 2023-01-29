@@ -1,4 +1,4 @@
-from macpep_scylladb.utils.proteomics.mass import to_int as mass_to_int
+from macpep_scylladb.proteomics.mass import to_int as mass_to_int
 
 
 class NeutralLoss:

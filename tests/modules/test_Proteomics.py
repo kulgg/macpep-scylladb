@@ -1,4 +1,4 @@
-from macpep_scylladb.models.Trypsin import Trypsin
+from macpep_scylladb.proteomics.Trypsin import Trypsin
 from macpep_scylladb.modules.Proteomics import Proteomics
 
 expected = {

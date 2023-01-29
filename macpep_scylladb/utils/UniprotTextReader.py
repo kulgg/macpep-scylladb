@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta
 
-from macpep_scylladb.models.Protein import Protein
+from macpep_scylladb.database.Protein import Protein
 
 
 class UniprotTextReader:
@@ -97,15 +97,15 @@ class UniprotTextReader:
                 elif line.startswith("//"):
                     primary_accession = accessions.pop(0)
                     return Protein(
-                        primary_accession,
-                        accessions,
-                        entry_name,
-                        name,
-                        sequence,
-                        taxonomy_id,
-                        proteome_id,
-                        is_reviewed,
-                        self.__dt_date_to_utc_timestamp(last_update),
+                        accession=primary_accession,
+                        secondary_accessions=accessions,
+                        entry_name=entry_name,
+                        name=name,
+                        sequence=sequence,
+                        taxonomy_id=taxonomy_id,
+                        proteomie_id=proteome_id,
+                        is_reviewed=is_reviewed,
+                        updated_at=self.__dt_date_to_utc_timestamp(last_update),
                     )
 
     def __process_id(self, line):

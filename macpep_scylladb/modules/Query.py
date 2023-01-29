@@ -1,7 +1,9 @@
 import logging
 import os
 from typing import List
+
 from cassandra.cqlengine import connection
+
 from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics

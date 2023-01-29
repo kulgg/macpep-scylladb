@@ -3,12 +3,13 @@ import sys
 
 import fire
 from exitstatus import ExitStatus
+
 from macpep_scylladb.modules.Cql import Cql
+from macpep_scylladb.modules.Inserter import Inserter
 from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Plots import Plots
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.modules.Query import Query
-from macpep_scylladb.modules.Inserter import Inserter
 
 
 class Commands:

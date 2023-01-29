@@ -1,12 +1,14 @@
 from typing import List
-from cassandra.cqlengine.query import BatchStatement
-from cassandra.query import BatchType
+
+from cassandra import ConsistencyLevel
+from cassandra.cluster import Session
 from cassandra.concurrent import execute_concurrent
+from cassandra.cqlengine.query import BatchStatement
+from cassandra.policies import FallthroughRetryPolicy
+from cassandra.query import BatchType
+
 from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.database.Protein import Protein
-from cassandra.cluster import Session
-from cassandra import ConsistencyLevel
-from cassandra.policies import FallthroughRetryPolicy
 
 
 class GeniusRetryPolicy(FallthroughRetryPolicy):

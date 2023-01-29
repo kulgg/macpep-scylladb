@@ -1,26 +1,25 @@
-from collections import Counter, defaultdict
 import csv
 import logging
-import time
-from progress.bar import Bar
 import multiprocessing
 import threading
-from time import sleep
+import time
+from collections import Counter, defaultdict
 from multiprocessing import Process, Value
-from cassandra.cluster import Cluster
+from time import sleep
+
+from cassandra import WriteFailure, WriteTimeout
+from cassandra.cluster import Cluster, NoHostAvailable
+from progress.bar import Bar
+
 from macpep_scylladb.database.Peptide import Peptide
-from macpep_scylladb.models.Protein import Protein
+from macpep_scylladb.database.Protein import Protein
 from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
-from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
-from macpep_scylladb.utils.dml import (
-    GeniusRetryPolicy,
+from macpep_scylladb.utils.dml import (  # upsert_peptides,
     batch_upsert_peptides,
     insert_proteins,
-    upsert_peptides,
 )
-from cassandra import WriteTimeout, WriteFailure
-from cassandra.cluster import NoHostAvailable
+from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
 
 
 class Inserter:
@@ -318,25 +317,6 @@ class Inserter:
         performance_logger.join()
 
         logging.info("Number of proteins: %d", self.num_proteins_added_to_queue)
-        logging.info("Number of peptides: %d", num_peptides_processed.value)
+        logging.info("Number of peptides: %d", num_peptides_processed.value)  # type: ignore
 
         uniprot_f.close()
-
-    def do(self, i):
-        logging.info(i)
-        if i == 3:
-            return "done"
-
-        raise Exception("Fail")
-
-    def a(self):
-        i = 0
-        while True:
-            try:
-                logging.info("Calling")
-                logging.info(self.do(i))
-                break
-            except:
-                i += 1
-                sleep(0.1)
-                continue

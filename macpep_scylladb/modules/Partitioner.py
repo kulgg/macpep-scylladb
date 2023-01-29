@@ -1,12 +1,12 @@
-from collections import defaultdict
 import collections
 import logging
 import os
-from typing import List, Dict, OrderedDict
+from collections import defaultdict
+from typing import Dict, List, OrderedDict
 
 from macpep_scylladb.modules.Proteomics import Proteomics
-from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
 from macpep_scylladb.utils.rolling_set import RollingSet
+from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
 
 
 class Partitioner:

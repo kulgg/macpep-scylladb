@@ -1,16 +1,14 @@
 from typing import List, Set, Tuple
-from macpep_scylladb.models.AminoAcid import (
-    AminoAcid,
-)
-from macpep_scylladb.models.DigestEnzyme import DigestEnzyme
-from macpep_scylladb.models.NeutralLoss import H2O
-from macpep_scylladb.models.Trypsin import Trypsin
 
-from macpep_scylladb.models.AminoAcid import X as UnknownAminoAcid
-from macpep_scylladb.utils.proteomics.digest import (
+from macpep_scylladb.proteomics.AminoAcid import AminoAcid
+from macpep_scylladb.proteomics.AminoAcid import X as UnknownAminoAcid
+from macpep_scylladb.proteomics.digest import (
     differentiate_ambigous_sequences,
     is_sequence_containing_replaceable_ambigous_amino_acids,
 )
+from macpep_scylladb.proteomics.DigestEnzyme import DigestEnzyme
+from macpep_scylladb.proteomics.NeutralLoss import H2O
+from macpep_scylladb.proteomics.Trypsin import Trypsin
 
 
 class Proteomics:

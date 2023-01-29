@@ -1,4 +1,4 @@
-from macpep_scylladb.models.AminoAcid import REPLACEABLE_AMBIGIOUS_AMINO_ACID_LOOKUP
+from macpep_scylladb.proteomics.AminoAcid import REPLACEABLE_AMBIGIOUS_AMINO_ACID_LOOKUP
 
 
 def is_sequence_containing_replaceable_ambigous_amino_acids(sequence: str) -> bool:

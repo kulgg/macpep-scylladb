@@ -2,7 +2,7 @@ import re
 
 from attr import dataclass
 
-from macpep_scylladb.models.DigestEnzyme import DigestEnzyme
+from macpep_scylladb.proteomics.DigestEnzyme import DigestEnzyme
 
 
 @dataclass
