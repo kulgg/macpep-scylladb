@@ -105,13 +105,12 @@ class Inserter:
                     if len(ps) >= 100 or force_insert:
                         batch_upsert_peptides(session, ps)
                         added.add(ps[0].partition)
+                        num_peptides_processed.value += len(ps)
                 timeout = sleep_after_timeout
                 break
             except (WriteTimeout, NoHostAvailable, WriteFailure):
                 sleep(timeout)
                 timeout *= 2
-
-        num_peptides_processed.value += len(peptide_list)
 
     def _worker(
         self, protein_queue, threshold, num_peptides_processed, sleep_after_timeout
