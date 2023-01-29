@@ -84,7 +84,12 @@ class Inserter:
         return peptides
 
     def _upsert_peptides(
-        self, session, peptide_list, num_peptides_processed, sleep_after_timeout
+        self,
+        session,
+        peptide_list,
+        num_peptides_processed,
+        sleep_after_timeout,
+        force_insert=False,
     ):
         peptides = defaultdict(list)
         for p in peptide_list:
@@ -97,8 +102,9 @@ class Inserter:
                 for ps in peptides.values():
                     if ps[0].partition in added:
                         continue
-                    batch_upsert_peptides(session, ps)
-                    added.add(ps[0].partition)
+                    if len(ps) >= 100 or force_insert:
+                        batch_upsert_peptides(session, ps)
+                        added.add(ps[0].partition)
                 timeout = sleep_after_timeout
                 break
             except (WriteTimeout, NoHostAvailable, WriteFailure):
@@ -122,14 +128,17 @@ class Inserter:
                 break
             peptide_list.extend(self._process_peptides(protein))
 
-            if len(peptide_list) > threshold:
-                self._upsert_peptides(
-                    session, peptide_list, num_peptides_processed, sleep_after_timeout
-                )
-                peptide_list = []
+            self._upsert_peptides(
+                session, peptide_list, num_peptides_processed, sleep_after_timeout
+            )
+            peptide_list = []
 
         self._upsert_peptides(
-            session, peptide_list, num_peptides_processed, sleep_after_timeout
+            session,
+            peptide_list,
+            num_peptides_processed,
+            sleep_after_timeout,
+            force_insert=True,
         )
         cluster.shutdown()
 
