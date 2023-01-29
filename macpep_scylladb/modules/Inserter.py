@@ -1,9 +1,7 @@
 from collections import Counter, defaultdict
 import csv
 import logging
-import random
 import time
-from typing import List
 from progress.bar import Bar
 import multiprocessing
 import threading
@@ -21,8 +19,7 @@ from macpep_scylladb.utils.dml import (
     insert_proteins,
     upsert_peptides,
 )
-from cassandra.policies import DCAwareRoundRobinPolicy
-from cassandra import WriteTimeout
+from cassandra import WriteTimeout, WriteFailure
 from cassandra.cluster import NoHostAvailable
 
 
@@ -104,7 +101,7 @@ class Inserter:
                     added.add(ps[0].partition)
                 timeout = sleep_after_timeout
                 break
-            except (WriteTimeout, NoHostAvailable):
+            except (WriteTimeout, NoHostAvailable, WriteFailure):
                 sleep(timeout)
                 timeout *= 2
 
@@ -214,7 +211,7 @@ class Inserter:
                 insert_proteins(session, proteins)
                 timeout = sleep_after_timeout
                 break
-            except (WriteTimeout, NoHostAvailable):
+            except (WriteTimeout, NoHostAvailable, WriteFailure):
                 sleep(timeout)
                 timeout *= 2
 
