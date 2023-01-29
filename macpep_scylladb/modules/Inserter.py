@@ -104,7 +104,7 @@ class Inserter:
                     added.add(ps[0].partition)
                 timeout = sleep_after_timeout
                 break
-            except WriteTimeout or NoHostAvailable:
+            except (WriteTimeout, NoHostAvailable):
                 sleep(timeout)
                 timeout *= 2
 
