@@ -4,16 +4,14 @@
 
 Digests proteins stored in FASTA-/Uniprot-Text-files and inserts the resulting peptides and proteins into a ScyllaDB cluster.
 
-ToDo:
+## Getting started
 
-- [x] Add function to digest protein sequence with enzyme
-- [ ] Add module for creating the protein/peptide schema in scylladb
-- [ ] Add module with main insertion loop (from uniprot txt into the db)
-
-How to Run
+Running with local docker compose Scylla cluster
 
 1. Start Docker
 2. `make up`
-3. Check that all scylla nodes are UN with `make status`
+3. Wait for all scylla nodes to be UN with `make status`
 4. Interact with app container `make app`
-5. Execute `poetry install`
+   - `cd app`
+   - `poetry install`
+   - `poetry run x` to run the CLI
