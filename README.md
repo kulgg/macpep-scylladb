@@ -2,7 +2,7 @@
 
 # MaCPepDB - Mass Centric Peptide Database
 
-Digests proteins stored in FASTA-/Uniprot-Text-files and inserts the resulting peptides and proteins into a ScyllaDB cluster.
+Digests proteins stored in FASTA / Uniprot textfiles and inserts the resulting peptides and proteins into a ScyllaDB NoSQL cluster.
 
 ## Getting started
 
