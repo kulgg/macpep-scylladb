@@ -102,6 +102,7 @@ class Inserter:
                 for ps in peptides.values():
                     if ps[0].partition in added:
                         continue
+                    logging.info(len(ps))
                     if len(ps) >= 100 or force_insert:
                         batch_upsert_peptides(session, ps)
                         added.add(ps[0].partition)
