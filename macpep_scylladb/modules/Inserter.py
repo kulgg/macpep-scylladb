@@ -94,9 +94,6 @@ class Inserter:
         peptides = defaultdict(list)
         for p in peptide_list:
             peptides[p.partition].append(p)
-            logging.info(
-                "partition %d: %d peptiders", p.partition, len(peptides[p.partition])
-            )
         added = set()
         timeout = sleep_after_timeout
         while True:
@@ -108,6 +105,7 @@ class Inserter:
                     if ps[0].partition in added:
                         continue
                     if len(ps) >= 100 or force_insert:
+                        logging.info("Inserting partition %d", ps[0].partition)
                         batch_upsert_peptides(session, ps)
                         added.add(ps[0].partition)
                         num_peptides_processed.value += len(ps)
@@ -140,6 +138,7 @@ class Inserter:
                 peptide_list = self._upsert_peptides(
                     session, peptide_list, num_peptides_processed, sleep_after_timeout
                 )
+                logging.info(peptide_list)
                 i = 0
             i += 1
 
