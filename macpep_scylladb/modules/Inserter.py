@@ -318,7 +318,7 @@ class Inserter:
         performance_logger.join()
 
         logging.info("Number of proteins: %d", self.num_proteins_added_to_queue)
-        logging.info("Number of peptides: %d", num_peptides_processed)
+        logging.info("Number of peptides: %d", num_peptides_processed.value)
 
         uniprot_f.close()
 
