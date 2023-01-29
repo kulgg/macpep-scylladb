@@ -135,11 +135,11 @@ class Inserter:
             peptide_list.extend(self._process_peptides(protein))
 
             if i > 100:
-                logging.info("Len peptide_list %d", len(peptide_list))
+                tmp = len(peptide_list)
                 peptide_list = self._upsert_peptides(
                     session, peptide_list, num_peptides_processed, sleep_after_timeout
                 )
-                logging.info("Len peptide_list %d", len(peptide_list))
+                logging.info("Inserted %d", len(peptide_list) - tmp)
                 i = 0
             i += 1
 
