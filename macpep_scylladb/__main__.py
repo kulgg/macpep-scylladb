@@ -10,6 +10,7 @@ from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Plots import Plots
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.modules.Query import Query
+from macpep_scylladb.modules.QueryPerformance import QueryPerformance
 
 
 class Commands:
@@ -20,6 +21,7 @@ class Commands:
         self.query = Query(self.proteomics, self.partitioner)
         self.inserter = Inserter(self.partitioner, self.proteomics)
         self.plots = Plots()
+        self.qp = QueryPerformance(self.query)
 
 
 def configure_logging():

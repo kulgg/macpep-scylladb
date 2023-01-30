@@ -14,17 +14,34 @@ class Query:
         self,
         proteomics: Proteomics,
         partitioner: Partitioner,
-        partitions_file_path: str = "data/partitions_1000.txt",
     ):
         self.proteomics = proteomics
         self.partitioner = partitioner
         self.partitions = []
+        self.current_partitions_path = ""
+        self.is_connection_setup = False
+
+    def _set_partitions(self, partitions_file_path: str):
+        if self.current_partitions_path == partitions_file_path:
+            return
+
         if os.path.exists(partitions_file_path):
             with open(partitions_file_path) as f:
                 self.partitions = list(map(int, f.read().splitlines()))
+            self.current_partitions_path = partitions_file_path
+        else:
+            raise Exception("Not a valid path")
 
-    def peptides_by_sequence(self, server: str, sequence: str) -> List[Peptide]:
-        connection.setup([server], "macpep")
+    def _setup_connection(self, server: str):
+        if not self.is_connection_setup:
+            connection.setup([server], "macpep")
+            self.is_connection_setup = True
+
+    def peptides_by_sequence(
+        self, server: str, sequence: str, partitions_file_path: str
+    ) -> List[Peptide]:
+        self._set_partitions(partitions_file_path)
+        self._setup_connection(server)
         mass = self.proteomics.calculate_mass(sequence)
         logging.info("Mass %d", mass)
         partition = self.partitioner.get_partition_index(self.partitions, mass)
@@ -36,8 +53,11 @@ class Query:
         logging.info(f"Found {len(peptides)} peptides with sequence {sequence}.")
         return peptides
 
-    def peptides_by_mass(self, server: str, mass: int) -> List[Peptide]:
-        connection.setup([server], "macpep")
+    def peptides_by_mass(
+        self, server: str, mass: int, partitions_file_path: str
+    ) -> List[Peptide]:
+        self._set_partitions(partitions_file_path)
+        self._setup_connection(server)
         logging.info("Mass %d", mass)
         partition = self.partitioner.get_partition_index(self.partitions, mass)
         logging.info("Partition %d", partition)
@@ -48,9 +68,10 @@ class Query:
         return peptides
 
     def peptides_by_mass_range(
-        self, server: str, lower: int, upper: int
+        self, server: str, lower: int, upper: int, partitions_file_path: str
     ) -> List[Peptide]:
-        connection.setup([server], "macpep")
+        self._set_partitions(partitions_file_path)
+        self._setup_connection(server)
         logging.info("Querying %d <= mass <= %d", lower, upper)
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
