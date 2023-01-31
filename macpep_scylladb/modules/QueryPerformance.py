@@ -27,17 +27,11 @@ class QueryPerformance:
     ):
         query = Query(self.proteomics, self.partitioner)
         total = 0
-        i = 0
-        num_masses = len(mass_list)
-        threshold = int(num_masses / 10)
         for mass in mass_list:
-            if i % threshold == 0:
-                logging.info(f"{i}/{num_masses}")
             lower, upper = self._get_tolerance_limits(mass)
             total += query.peptides_by_mass_range(
                 servers, lower, upper, partitions_file_path
             )
-            i += 1
         return total
 
     def _query_multithreaded(
