@@ -82,8 +82,6 @@ class Query:
         self._setup_cluster(servers)
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
-        if upper_partition - lower_partition > 0:
-            logging.info(f"Querying {upper_partition - lower_partition} partitions")
         total = 0
         for i in range(lower_partition, upper_partition + 1):
             total += len(list(query_peptides(self.session, i, lower, upper)))
