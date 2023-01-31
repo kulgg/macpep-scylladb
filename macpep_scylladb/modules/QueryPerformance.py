@@ -19,8 +19,8 @@ class QueryPerformance:
             yield a_list[i : i + chunk_size]
 
     def _get_tolerance_limits(self, mass):
-        tolerance = int((mass / 1000000) * 5)
-        return mass - tolerance, mass + tolerance
+        tolerance = (mass / 1000000) * 5.0
+        return to_int(mass - tolerance), to_int(mass + tolerance)
 
     def _query(self, server: str, partitions_file_path: str, mass_list: List[int]):
         query = Query(self.proteomics, self.partitioner)
@@ -32,8 +32,8 @@ class QueryPerformance:
             if i % threshold == 0:
                 logging.info(f"{i}/{num_masses}")
             lower, upper = self._get_tolerance_limits(mass)
-            total += len(
-                query.peptides_by_mass_range(server, lower, upper, partitions_file_path)
+            total += query.peptides_by_mass_range(
+                server, lower, upper, partitions_file_path
             )
             i += 1
         return total
@@ -69,7 +69,7 @@ class QueryPerformance:
         num_threads: int = 16,
     ):
         with open(mass_file_path) as f:
-            mass_list = list(map(lambda x: to_int(float(x)), f.read().splitlines()))
+            mass_list = list(map(lambda x: float(x), f.read().splitlines()))
         logging.info(f"Found {len(mass_list)} masses")
 
         if use_singlethreading:

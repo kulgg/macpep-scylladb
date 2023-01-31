@@ -82,8 +82,8 @@ class Query:
         self._setup_cluster(server)
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
-        peptides: List[Peptide] = []
+        total = 0
         for i in range(lower_partition, upper_partition + 1):
-            peptides.extend(query_peptides(self.session, i, lower, upper))
+            total += len(query_peptides(self.session, i, lower, upper))
 
-        return peptides
+        return total
