@@ -84,6 +84,6 @@ class Query:
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
         total = 0
         for i in range(lower_partition, upper_partition + 1):
-            total += len(query_peptides(self.session, i, lower, upper))
+            total += len(list(query_peptides(self.session, i, lower, upper)))
 
         return total
