@@ -39,9 +39,9 @@ class Query:
     #         connection.setup([server], "macpep")
     #         self.is_connection_setup = True
 
-    def _setup_cluster(self, server: str):
+    def _setup_cluster(self, servers: List[str]):
         if not self.session:
-            cluster = Cluster([server])
+            cluster = Cluster(servers)
             self.session = cluster.connect("macpep")
             self.is_connection_setup = True
 
@@ -76,10 +76,10 @@ class Query:
     #     return peptides
 
     def peptides_by_mass_range(
-        self, server: str, lower: int, upper: int, partitions_file_path: str
+        self, servers: str, lower: int, upper: int, partitions_file_path: str
     ) -> List[Peptide]:
         self._set_partitions(partitions_file_path)
-        self._setup_cluster(server)
+        self._setup_cluster(servers)
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
         total = 0

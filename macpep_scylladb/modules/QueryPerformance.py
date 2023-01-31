@@ -22,7 +22,9 @@ class QueryPerformance:
         tolerance = (mass / 1000000) * 5.0
         return to_int(mass - tolerance), to_int(mass + tolerance)
 
-    def _query(self, server: str, partitions_file_path: str, mass_list: List[int]):
+    def _query(
+        self, servers: List[str], partitions_file_path: str, mass_list: List[int]
+    ):
         query = Query(self.proteomics, self.partitioner)
         total = 0
         i = 0
@@ -33,14 +35,14 @@ class QueryPerformance:
                 logging.info(f"{i}/{num_masses}")
             lower, upper = self._get_tolerance_limits(mass)
             total += query.peptides_by_mass_range(
-                server, lower, upper, partitions_file_path
+                servers, lower, upper, partitions_file_path
             )
             i += 1
         return total
 
     def _query_multithreaded(
         self,
-        server: str,
+        servers: List[str],
         partitions_file_path: str,
         mass_list: List[int],
         num_threads: int,
@@ -50,7 +52,7 @@ class QueryPerformance:
             max_workers=num_threads
         ) as executor:
             query_futures: List[concurrent.futures.Future] = [
-                executor.submit(self._query, server, partitions_file_path, m_slice)
+                executor.submit(self._query, servers, partitions_file_path, m_slice)
                 for m_slice in self._slice_list(
                     mass_list, math.ceil(len(mass_list) / num_threads)
                 )
@@ -61,13 +63,14 @@ class QueryPerformance:
 
     def query_mass_ranges(
         self,
-        server: str,
+        servers: str,
         mass_file_path: str,
         partitions_file_path: str,
         use_singlethreading: bool = True,
         use_multithreading: bool = True,
         num_threads: int = 16,
     ):
+        servers = servers.split(",")
         with open(mass_file_path) as f:
             mass_list = list(map(lambda x: float(x), f.read().splitlines()))
         logging.info(f"Found {len(mass_list)} masses")
@@ -76,7 +79,7 @@ class QueryPerformance:
             elapsed = timeit.timeit(
                 lambda: logging.info(
                     "Queried"
-                    f" {self._query(server, partitions_file_path, mass_list)} peptides"
+                    f" {self._query(servers, partitions_file_path, mass_list)} peptides"
                 ),
                 number=1,
             )
@@ -85,7 +88,7 @@ class QueryPerformance:
         if use_multithreading:
             elapsed = timeit.timeit(
                 lambda: self._query_multithreaded(
-                    server, partitions_file_path, mass_list, num_threads
+                    servers, partitions_file_path, mass_list, num_threads
                 ),
                 number=1,
             )
