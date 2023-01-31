@@ -4,7 +4,7 @@
 name = "attrs"
 version = "22.1.0"
 description = "Classes Without Boilerplate"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 files = [
@@ -223,7 +223,7 @@ files = [
 name = "exceptiongroup"
 version = "1.0.0"
 description = "Backport of PEP 654 (exception groups)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -324,7 +324,7 @@ six = "*"
 name = "iniconfig"
 version = "1.1.1"
 description = "iniconfig: brain-dead simple config-ini parsing"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -764,7 +764,7 @@ test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock 
 name = "pluggy"
 version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -830,7 +830,7 @@ diagrams = ["jinja2", "railroad-diagrams"]
 name = "pytest"
 version = "7.2.0"
 description = "pytest: simple powerful testing with Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -849,6 +849,20 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 
 [package.extras]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
+
+[[package]]
+name = "pytest-timeit"
+version = "0.3.0"
+description = "A pytest plugin to time test function runs"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytest-timeit-0.3.0.tar.gz", hash = "sha256:f312e517bd90dd2c403335a0cb103cbc6dc26e3e38990b4d8ddb657383db0ccf"},
+]
+
+[package.dependencies]
+pytest = ">=3.0.0"
 
 [[package]]
 name = "python-dateutil"
@@ -937,7 +951,7 @@ test = ["django", "mypy", "pytest (>=3.6)", "pytest-cov", "pytest-django", "sybi
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1068,4 +1082,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "c577a16dd517df604f6205af52d81fc576a65653aa566d644c8f9a100963bef5"
+content-hash = "e916f34992cbd5132b8d1d8654f4486a1597480f19f7cc8ecffd21bb38b0f8f2"

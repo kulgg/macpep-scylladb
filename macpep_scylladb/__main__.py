@@ -21,7 +21,7 @@ class Commands:
         self.query = Query(self.proteomics, self.partitioner)
         self.inserter = Inserter(self.partitioner, self.proteomics)
         self.plots = Plots()
-        self.qp = QueryPerformance(self.query)
+        self.qp = QueryPerformance(self.proteomics, self.partitioner)
 
 
 def configure_logging():
