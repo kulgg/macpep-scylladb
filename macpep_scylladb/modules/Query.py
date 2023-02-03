@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List
+from typing import Awaitable, List
 
 from cassandra.cluster import Cluster
 
@@ -77,13 +77,13 @@ class Query:
 
     def peptides_by_mass_range(
         self, servers: str, lower: int, upper: int, partitions_file_path: str
-    ) -> List[Peptide]:
+    ) -> List[Awaitable]:
         self._set_partitions(partitions_file_path)
         self._setup_cluster(servers)
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
-        total = 0
+        futures = []
         for i in range(lower_partition, upper_partition + 1):
-            total += len(list(query_peptides(self.session, i, lower, upper)))
+            futures.append(query_peptides(self.session, i, lower, upper))
 
-        return total
+        return futures

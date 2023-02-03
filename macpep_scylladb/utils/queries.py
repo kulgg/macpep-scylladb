@@ -1,4 +1,3 @@
-import logging
 from cassandra.cluster import Session
 
 
@@ -9,8 +8,4 @@ def query_peptides(session: Session, partition: int, lower_mass: int, upper_mass
     params = (partition, lower_mass, upper_mass)
     future = session.execute_async(query_statement, params)
 
-    try:
-        results = future.result()
-        return results
-    except Exception:
-        logging.error("Query failed")
+    return future

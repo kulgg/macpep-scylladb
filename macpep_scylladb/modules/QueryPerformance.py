@@ -26,13 +26,31 @@ class QueryPerformance:
         self, servers: List[str], partitions_file_path: str, mass_list: List[int]
     ):
         query = Query(self.proteomics, self.partitioner)
-        total = 0
+        futures = []
         for mass in mass_list:
             lower, upper = self._get_tolerance_limits(mass)
-            total += query.peptides_by_mass_range(
-                servers, lower, upper, partitions_file_path
+            futures.extend(
+                query.peptides_by_mass_range(
+                    servers, lower, upper, partitions_file_path
+                )
             )
-        return total
+
+        return list(map(lambda x: x.result(), futures))
+
+    def _query_singlethreaded(
+        self,
+        servers: List[str],
+        partitions_file_path: str,
+        mass_list: List[int],
+    ):
+        peptides_list = self._query(servers, partitions_file_path, mass_list)
+        total = 0
+        try:
+            for future in peptides_list:
+                total += len(list(future))
+            return total
+        except Exception:
+            logging.error("Query failed")
 
     def _query_multithreaded(
         self,
@@ -51,8 +69,13 @@ class QueryPerformance:
                     mass_list, math.ceil(len(mass_list) / num_threads)
                 )
             ]
-            for future in concurrent.futures.as_completed(query_futures):
-                total += future.result()
+            for peptides_list in query_futures:
+                try:
+                    for peptides in peptides_list.result():
+                        total += len(list(peptides))
+                except Exception as e:
+                    logging.error("Query failed")
+                    logging.error(e)
         logging.info("Queried %d peptides total" % total)
 
     def query_mass_ranges(
@@ -73,7 +96,7 @@ class QueryPerformance:
             elapsed = timeit.timeit(
                 lambda: logging.info(
                     "Queried"
-                    f" {self._query(servers, partitions_file_path, mass_list)} peptides"
+                    f" {self._query_singlethreaded(servers, partitions_file_path, mass_list)} peptides"
                 ),
                 number=1,
             )
