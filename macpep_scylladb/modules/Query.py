@@ -89,9 +89,9 @@ class Query:
             )
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
-        peptides = []
+        futures = []
         for i in range(lower_partition, upper_partition + 1):
-            peptides.extend(
+            futures.append(
                 query_peptides(
                     self.session,
                     self.prepared_statements["peptides_by_mass_range"],
@@ -100,4 +100,4 @@ class Query:
                     upper,
                 )
             )
-        return peptides
+        return futures

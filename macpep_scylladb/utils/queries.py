@@ -6,7 +6,8 @@ def prepare_peptide_query(session):
 
 def query_peptides(session, statement, partition, lower_mass, upper_mass):
     params = (partition, lower_mass, upper_mass)
-    return session.execute(statement, params)
+    futures = session.execute_async(statement, params)
+    return futures
 
 
 # def query_peptides_with_callback(

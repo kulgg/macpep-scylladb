@@ -30,15 +30,16 @@ class QueryPerformance:
     ):
         query = Query(self.proteomics, self.partitioner)
 
-        total = 0
+        futures = []
         for mass in mass_list:
             lower, upper = self._get_tolerance_limits(mass)
-            total += len(
+            futures.extend(
                 query.peptides_by_mass_range(
                     servers, lower, upper, partitions_file_path
                 )
             )
-        return total
+
+        return list(map(lambda x: x.result(), futures))
 
     def _query_singlethreaded(
         self,
@@ -46,7 +47,11 @@ class QueryPerformance:
         partitions_file_path: str,
         mass_list: List[int],
     ):
-        return self._query(servers, partitions_file_path, mass_list)
+        total = 0
+        for peptides_list in self._query(servers, partitions_file_path, mass_list):
+            for peptides in peptides_list:
+                total += len(peptides)
+        return total
 
     def _query_multithreaded(
         self,
