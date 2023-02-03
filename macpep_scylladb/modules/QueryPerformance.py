@@ -63,6 +63,7 @@ class QueryPerformance:
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=num_threads
         ) as executor:
+            total = 0
             query_futures: List[concurrent.futures.Future] = [
                 executor.submit(
                     self._query,
@@ -74,15 +75,16 @@ class QueryPerformance:
                     mass_list, math.ceil(len(mass_list) / num_threads)
                 )
             ]
-            for future in query_futures:
-                future.result()
+            for future in concurrent.futures.as_completed(query_futures):
+                for peptides in future.result():
+                    total += len(peptides)
             # concurrent.futures.wait(
             #     query_futures,
             #     timeout=None,
             #     return_when=concurrent.futures.ALL_COMPLETED,
             # )
 
-        # logging.info("Queried %d peptides total" % self.total)
+        logging.info("Queried %d peptides total" % total)
 
     def query_mass_ranges(
         self,
