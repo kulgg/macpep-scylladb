@@ -30,16 +30,21 @@ class QueryPerformance:
     ):
         query = Query(self.proteomics, self.partitioner)
 
-        futures = []
+        total = 0
+        tmp = []
+        i = 0
         for mass in mass_list:
             lower, upper = self._get_tolerance_limits(mass)
-            futures.extend(
-                query.peptides_by_mass_range(
-                    servers, lower, upper, partitions_file_path
+            tmp.append((lower, upper))
+            if i >= 100:
+                total += query.peptides_by_mass_range_list(
+                    servers, tmp, partitions_file_path
                 )
-            )
-
-        return list(map(lambda x: x.result(), futures))
+                tmp = []
+                i = 0
+            i += 1
+        total += query.peptides_by_mass_range_list(servers, tmp, partitions_file_path)
+        return total
 
     def _query_singlethreaded(
         self,
@@ -47,11 +52,7 @@ class QueryPerformance:
         partitions_file_path: str,
         mass_list: List[int],
     ):
-        total = 0
-        for peptides_list in self._query(servers, partitions_file_path, mass_list):
-            for peptides in peptides_list:
-                total += len(peptides)
-        return total
+        return self._query(servers, partitions_file_path, mass_list)
 
     def _query_multithreaded(
         self,
@@ -76,13 +77,7 @@ class QueryPerformance:
                 )
             ]
             for future in concurrent.futures.as_completed(query_futures):
-                for peptides in future.result():
-                    total += len(peptides)
-            # concurrent.futures.wait(
-            #     query_futures,
-            #     timeout=None,
-            #     return_when=concurrent.futures.ALL_COMPLETED,
-            # )
+                total += future.result()
 
         logging.info("Queried %d peptides total" % total)
 

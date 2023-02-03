@@ -1,3 +1,6 @@
+from cassandra.concurrent import execute_concurrent
+
+
 def prepare_peptide_query(session):
     query_str = """SELECT * FROM macpep.peptides WHERE "partition" = ? AND "mass" >= ? AND "mass" <= ?"""
     query_statement = session.prepare(query_str)
@@ -6,8 +9,15 @@ def prepare_peptide_query(session):
 
 def query_peptides(session, statement, partition, lower_mass, upper_mass):
     params = (partition, lower_mass, upper_mass)
-    futures = session.execute_async(statement, params)
-    return futures
+    return session.execute(statement, params)
+
+
+def query_peptides_list(session, statement, params_list):
+    statements_and_params = []
+    for p in params_list:
+        statements_and_params.append((statement, p))
+
+    return execute_concurrent(session, statements_and_params, raise_on_first_error=True)
 
 
 # def query_peptides_with_callback(

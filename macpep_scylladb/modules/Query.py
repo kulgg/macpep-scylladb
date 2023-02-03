@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Awaitable, List
+from typing import Awaitable, List, Tuple
 
 from cassandra.cluster import Cluster
 
@@ -10,6 +10,7 @@ from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.queries import (
     prepare_peptide_query,
     query_peptides,
+    query_peptides_list,
 )
 
 
@@ -89,15 +90,57 @@ class Query:
             )
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
-        futures = []
+        total = 0
         for i in range(lower_partition, upper_partition + 1):
-            futures.append(
-                query_peptides(
-                    self.session,
-                    self.prepared_statements["peptides_by_mass_range"],
-                    i,
-                    lower,
-                    upper,
+            total += len(
+                list(
+                    query_peptides(
+                        self.session,
+                        self.prepared_statements["peptides_by_mass_range"],
+                        i,
+                        lower,
+                        upper,
+                    )
                 )
             )
-        return futures
+        return total
+
+    def peptides_by_mass_range_list(
+        self,
+        servers: str,
+        lowerUpperList: List[Tuple[int, int]],
+        partitions_file_path: str,
+    ) -> List[Awaitable]:
+        self._set_partitions(partitions_file_path)
+        self._setup_cluster(servers)
+        if "peptides_by_mass_range" not in self.prepared_statements:
+            logging.info("Preparing statement")
+            self.prepared_statements["peptides_by_mass_range"] = prepare_peptide_query(
+                self.session
+            )
+
+        params = []
+        for lower, upper in lowerUpperList:
+            lower_partition = self.partitioner.get_partition_index(
+                self.partitions, lower
+            )
+            upper_partition = self.partitioner.get_partition_index(
+                self.partitions, upper
+            )
+            for i in range(lower_partition, upper_partition + 1):
+                params.append((i, lower, upper))
+
+        results = query_peptides_list(
+            self.session,
+            self.prepared_statements["peptides_by_mass_range"],
+            params,
+        )
+
+        total = 0
+        for success, result in results:
+            if not success:
+                raise Exception(result)  # result will be an Exception
+            else:
+                total += len(list(result))
+
+        return total
