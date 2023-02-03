@@ -7,12 +7,20 @@ from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.modules.Query import Query
 from macpep_scylladb.proteomics.mass import to_int
+from multiprocessing import Value
 
 
 class QueryPerformance:
     def __init__(self, proteomics: Proteomics, partitioner: Partitioner):
         self.proteomics = proteomics
         self.partitioner = partitioner
+        self.total = 0
+
+    def _log_results(self, results):
+        self.total += len(results)
+
+    def _log_error(self, exc):
+        logging.error("Operation failed: %s", exc)
 
     def _slice_list(self, a_list, chunk_size):
         for i in range(0, len(a_list), chunk_size):
@@ -23,19 +31,24 @@ class QueryPerformance:
         return to_int(mass - tolerance), to_int(mass + tolerance)
 
     def _query(
-        self, servers: List[str], partitions_file_path: str, mass_list: List[int]
+        self,
+        servers: List[str],
+        partitions_file_path: str,
+        mass_list: List[int],
+        use_safe=True,
     ):
         query = Query(self.proteomics, self.partitioner)
-        futures = []
+
         for mass in mass_list:
             lower, upper = self._get_tolerance_limits(mass)
-            futures.extend(
-                query.peptides_by_mass_range(
-                    servers, lower, upper, partitions_file_path
-                )
+            query.peptides_by_mass_range_with_callback(
+                servers,
+                lower,
+                upper,
+                partitions_file_path,
+                self._log_results,
+                self._log_error,
             )
-
-        return list(map(lambda x: x.result(), futures))
 
     def _query_singlethreaded(
         self,
@@ -43,14 +56,8 @@ class QueryPerformance:
         partitions_file_path: str,
         mass_list: List[int],
     ):
-        peptides_list = self._query(servers, partitions_file_path, mass_list)
-        total = 0
-        try:
-            for future in peptides_list:
-                total += len(list(future))
-            return total
-        except Exception:
-            logging.error("Query failed")
+        self._query(servers, partitions_file_path, mass_list)
+        return self.total
 
     def _query_multithreaded(
         self,
@@ -59,24 +66,29 @@ class QueryPerformance:
         mass_list: List[int],
         num_threads: int,
     ):
-        total = 0
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=num_threads
         ) as executor:
             query_futures: List[concurrent.futures.Future] = [
-                executor.submit(self._query, servers, partitions_file_path, m_slice)
+                executor.submit(
+                    self._query,
+                    servers,
+                    partitions_file_path,
+                    m_slice,
+                )
                 for m_slice in self._slice_list(
                     mass_list, math.ceil(len(mass_list) / num_threads)
                 )
             ]
-            for peptides_list in query_futures:
-                try:
-                    for peptides in peptides_list.result():
-                        total += len(list(peptides))
-                except Exception as e:
-                    logging.error("Query failed")
-                    logging.error(e)
-        logging.info("Queried %d peptides total" % total)
+            for future in query_futures:
+                future.result()
+            # concurrent.futures.wait(
+            #     query_futures,
+            #     timeout=None,
+            #     return_when=concurrent.futures.ALL_COMPLETED,
+            # )
+
+        # logging.info("Queried %d peptides total" % self.total)
 
     def query_mass_ranges(
         self,
@@ -93,6 +105,7 @@ class QueryPerformance:
         logging.info(f"Found {len(mass_list)} masses")
 
         if use_singlethreading:
+            self.total = 0
             elapsed = timeit.timeit(
                 lambda: logging.info(
                     "Queried"
