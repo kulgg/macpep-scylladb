@@ -7,7 +7,10 @@ from cassandra.cluster import Cluster
 from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
-from macpep_scylladb.utils.queries import query_peptides_with_callback
+from macpep_scylladb.utils.queries import (
+    prepare_peptide_query,
+    query_peptides,
+)
 
 
 class Query:
@@ -20,8 +23,8 @@ class Query:
         self.partitioner = partitioner
         self.partitions = []
         self.current_partitions_path = ""
-        self.is_connection_setup = False
         self.session = None
+        self.prepared_statements = dict()
 
     def _set_partitions(self, partitions_file_path: str):
         if self.current_partitions_path == partitions_file_path:
@@ -43,7 +46,6 @@ class Query:
         if not self.session:
             cluster = Cluster(servers)
             self.session = cluster.connect("macpep")
-            self.is_connection_setup = True
 
     # def peptides_by_sequence(
     #     self, server: str, sequence: str, partitions_file_path: str
@@ -75,20 +77,27 @@ class Query:
 
     #     return peptides
 
-    def peptides_by_mass_range_with_callback(
-        self,
-        servers: str,
-        lower: int,
-        upper: int,
-        partitions_file_path: str,
-        result_cb,
-        error_cb,
+    def peptides_by_mass_range(
+        self, servers: str, lower: int, upper: int, partitions_file_path: str
     ) -> List[Awaitable]:
         self._set_partitions(partitions_file_path)
         self._setup_cluster(servers)
+        if "peptides_by_mass_range" not in self.prepared_statements:
+            logging.info("Preparing statement")
+            self.prepared_statements["peptides_by_mass_range"] = prepare_peptide_query(
+                self.session
+            )
         lower_partition = self.partitioner.get_partition_index(self.partitions, lower)
         upper_partition = self.partitioner.get_partition_index(self.partitions, upper)
+        peptides = []
         for i in range(lower_partition, upper_partition + 1):
-            query_peptides_with_callback(
-                self.session, i, lower, upper, result_cb, error_cb
+            peptides.extend(
+                query_peptides(
+                    self.session,
+                    self.prepared_statements["peptides_by_mass_range"],
+                    i,
+                    lower,
+                    upper,
+                )
             )
+        return peptides

@@ -7,20 +7,12 @@ from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.modules.Query import Query
 from macpep_scylladb.proteomics.mass import to_int
-from multiprocessing import Value
 
 
 class QueryPerformance:
     def __init__(self, proteomics: Proteomics, partitioner: Partitioner):
         self.proteomics = proteomics
         self.partitioner = partitioner
-        self.total = 0
-
-    def _log_results(self, results):
-        self.total += len(results)
-
-    def _log_error(self, exc):
-        logging.error("Operation failed: %s", exc)
 
     def _slice_list(self, a_list, chunk_size):
         for i in range(0, len(a_list), chunk_size):
@@ -35,20 +27,18 @@ class QueryPerformance:
         servers: List[str],
         partitions_file_path: str,
         mass_list: List[int],
-        use_safe=True,
     ):
         query = Query(self.proteomics, self.partitioner)
 
+        total = 0
         for mass in mass_list:
             lower, upper = self._get_tolerance_limits(mass)
-            query.peptides_by_mass_range_with_callback(
-                servers,
-                lower,
-                upper,
-                partitions_file_path,
-                self._log_results,
-                self._log_error,
+            total += len(
+                query.peptides_by_mass_range(
+                    servers, lower, upper, partitions_file_path
+                )
             )
+        return total
 
     def _query_singlethreaded(
         self,
@@ -56,8 +46,7 @@ class QueryPerformance:
         partitions_file_path: str,
         mass_list: List[int],
     ):
-        self._query(servers, partitions_file_path, mass_list)
-        return self.total
+        return self._query(servers, partitions_file_path, mass_list)
 
     def _query_multithreaded(
         self,

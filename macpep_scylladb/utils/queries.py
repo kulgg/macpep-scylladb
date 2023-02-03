@@ -1,23 +1,33 @@
-from cassandra.cluster import Session
+def prepare_peptide_query(session):
+    query_str = """SELECT * FROM macpep.peptides WHERE "partition" = ? AND "mass" >= ? AND "mass" <= ?"""
+    query_statement = session.prepare(query_str)
+    return query_statement
 
 
-def query_peptides_with_callback(
-    session: Session,
-    partition: int,
-    lower_mass: int,
-    upper_mass: int,
-    result_cb,
-    error_cb,
-):
-    query_str = (
-        'SELECT * FROM macpep.peptides WHERE "partition" = {partition} AND "mass" >='
-        ' {lower} AND "mass" <= {upper}'
-    )
-    # query_statement = session.prepare(query_str)
+def query_peptides(session, statement, partition, lower_mass, upper_mass):
+    params = (partition, lower_mass, upper_mass)
+    return session.execute(statement, params)
 
-    # params = (partition, lower_mass, upper_mass)
-    future = session.execute_async(
-        query_str.format(partition=partition, lower=lower_mass, upper=upper_mass)
-    )
 
-    future.add_callbacks(result_cb, error_cb)
+# def query_peptides_with_callback(
+#     session: Session,
+#     partition: int,
+#     lower_mass: int,
+#     upper_mass: int,
+#     result_cb,
+#     error_cb,
+# ):
+#     query_str = (
+#         "SELECT * FROM macpep.peptides WHERE partition = {partition} AND mass >="
+#         " {lower} AND mass <= {upper}"
+#     )
+#     # query_statement = session.prepare(query_str)
+
+#     # params = (partition, lower_mass, upper_mass)
+#     query = query_str.format(partition=partition, lower=lower_mass, upper=upper_mass)
+#     future = session.execute_async(query=query)
+#     future.add_callbacks(result_cb, error_cb)
+
+#     return future
+
+# def query_peptides()
