@@ -149,6 +149,7 @@ class Inserter:
             peptide_list,
             num_peptides_processed,
             sleep_after_timeout,
+            upsert_statement,
             force_insert=True,
         )
         cluster.shutdown()
