@@ -18,6 +18,7 @@ from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.dml import (  # upsert_peptides,
     batch_upsert_peptides,
     insert_proteins,
+    prepare_upsert_peptide_statement,
 )
 from macpep_scylladb.utils.UniprotTextReader import UniprotTextReader
 
@@ -88,6 +89,7 @@ class Inserter:
         peptide_list,
         num_peptides_processed,
         sleep_after_timeout,
+        upsert_statement,
         force_insert=False,
     ):
         peptides = defaultdict(list)
@@ -104,7 +106,7 @@ class Inserter:
                     if ps[0].partition in added:
                         continue
                     if len(ps) >= 100 or force_insert:
-                        batch_upsert_peptides(session, ps)
+                        batch_upsert_peptides(session, ps, upsert_statement)
                         added.add(ps[0].partition)
                         num_peptides_processed.value += len(ps)
                 timeout = sleep_after_timeout
@@ -119,6 +121,7 @@ class Inserter:
         cluster = Cluster(self.server)
         session = cluster.connect("macpep")
         session.default_timeout = 30
+        upsert_statement = prepare_upsert_peptide_statement(session)
 
         peptide_list = []
 
@@ -132,7 +135,11 @@ class Inserter:
 
             if i > 10:
                 peptide_list = self._upsert_peptides(
-                    session, peptide_list, num_peptides_processed, sleep_after_timeout
+                    session,
+                    peptide_list,
+                    num_peptides_processed,
+                    sleep_after_timeout,
+                    upsert_statement,
                 )
                 i = 0
             i += 1

@@ -21,6 +21,11 @@ class GeniusRetryPolicy(FallthroughRetryPolicy):
         return self.RETRY_NEXT_HOST, None
 
 
+def prepare_upsert_peptide_statement(session: Session):
+    update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?  WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
+    return session.prepare(update_statement_str)
+
+
 def insert_proteins(session, proteins: List[Protein]):
     insert_statement_str = """INSERT INTO macpep.proteins ("accession", "secondary_accessions", "entry_name", "name", "sequence", "taxonomy_id", "proteome_id", "is_reviewed", "updated_at") VALUES (?,?,?,?,?,?,?,?,?)"""
     insert_statement = session.prepare(insert_statement_str)
@@ -43,9 +48,7 @@ def insert_proteins(session, proteins: List[Protein]):
     execute_concurrent(session, statements_and_params, raise_on_first_error=True)
 
 
-def batch_upsert_peptides(session: Session, peptides: List[Peptide]):
-    update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?  WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
-    update_statement = session.prepare(update_statement_str)
+def batch_upsert_peptides(session: Session, peptides: List[Peptide], statement):
     batch = BatchStatement(
         BatchType.UNLOGGED,
         retry_policy=GeniusRetryPolicy(),
@@ -93,16 +96,12 @@ def batch_upsert_peptides(session: Session, peptides: List[Peptide]):
             p.mass,
             p.sequence,
         )
-        batch.add(update_statement, params)
+        batch.add(statement, params)
 
     session.execute(batch)
 
 
-def upsert_peptides(session: Session, peptides: List[Peptide]):
-    # Using execute_concurrent with the same UPDATE statement that upsert_peptides uses under the hood is significantly faster
-    update_statement_str = """UPDATE macpep.peptides SET "proteins" = "proteins" + ?, "length" = ?, "number_of_missed_cleavages" = ?, "a_count" = ?, "b_count" = ?, "c_count" = ?, "d_count" = ?, "e_count" = ?, "f_count" = ?, "g_count" = ?, "h_count" = ?, "i_count" = ?, "j_count" = ?, "k_count" = ?, "l_count" = ?, "m_count" = ?, "n_count" = ?, "o_count" = ?, "p_count" = ?, "q_count" = ?, "r_count" = ?, "s_count" = ?, "t_count" = ?, "u_count" = ?, "v_count" = ?, "w_count" = ?, "y_count" = ?, "z_count" = ?, "n_terminus" = ?, "c_terminus" = ?  WHERE "partition" = ? AND "mass" = ? AND "sequence" = ?"""
-    update_statement = session.prepare(update_statement_str)
-
+def upsert_peptides(session: Session, peptides: List[Peptide], statement):
     statements_and_params = []
     for p in peptides:
         params = (
@@ -145,7 +144,7 @@ def upsert_peptides(session: Session, peptides: List[Peptide]):
             p.mass,
             p.sequence,
         )
-        statements_and_params.append((update_statement, params))
+        statements_and_params.append((statement, params))
 
     execute_concurrent(session, statements_and_params, raise_on_first_error=True)
 
