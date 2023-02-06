@@ -303,8 +303,7 @@ class Inserter:
 
         for protein in reader:
             while protein_queue.qsize() > max_protein_queue_size:
-                logging.info("Waiting for queue size to reduce")
-                sleep(1)
+                sleep(0.1)
             self.num_proteins_added_to_queue += 1
             protein_list.append(protein)
             protein_queue.put(protein)
