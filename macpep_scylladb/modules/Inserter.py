@@ -302,9 +302,8 @@ class Inserter:
         session = cluster.connect("macpep")
 
         for protein in reader:
-            if protein_queue.qsize() > max_protein_queue_size:
+            while protein_queue.qsize() > max_protein_queue_size:
                 sleep(0.1)
-                continue
             self.num_proteins_added_to_queue += 1
             protein_list.append(protein)
             protein_queue.put(protein)
