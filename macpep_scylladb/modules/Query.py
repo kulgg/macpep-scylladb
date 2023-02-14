@@ -4,7 +4,6 @@ from typing import Awaitable, List, Tuple
 
 from cassandra.cluster import Cluster
 
-from macpep_scylladb.database.Peptide import Peptide
 from macpep_scylladb.modules.Partitioner import Partitioner
 from macpep_scylladb.modules.Proteomics import Proteomics
 from macpep_scylladb.utils.queries import (
