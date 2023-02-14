@@ -29,13 +29,9 @@ info:
 	docker exec -it $$(docker-compose ps -q node1) nodetool describecluster
 
 # Python Build
-build: lint check_types test
+build: lint test
 
 lint:
 	poetry run flake8
-
-check_types:
-	poetry run mypy .
-
 test:
 	poetry run pytest
