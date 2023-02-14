@@ -16,10 +16,10 @@ class Partitioner:
     def _get_partitions(
         self,
         num_partitions: int,
-        num_peptides: int,
+        num_unique_peptides: int,
         peptides_per_mass: OrderedDict[int, int],
     ) -> List[int]:
-        peptides_per_partition = int(num_peptides / num_partitions)
+        peptides_per_partition = int(num_unique_peptides / num_partitions)
         logging.info("Peptides per partition: %d", peptides_per_partition)
 
         partitions = [0]
@@ -54,7 +54,7 @@ class Partitioner:
             peptides_per_mass: Dict[int, int] = defaultdict(int)
             num_proteins = 0
             num_peptides = 0
-            num_unique_peptides = 0
+            num_unique_peptides_approx = 0
             seen_peptides = RollingSet(rolling_set_maxsize)
 
             for protein in reader:
@@ -67,13 +67,15 @@ class Partitioner:
                         seen_peptides.add(peptide_sequence)
                         mass = self.proteomics.calculate_mass(peptide_sequence)
                         peptides_per_mass[mass] += 1
-                        num_unique_peptides += 1
+                        num_unique_peptides_approx += 1
                     if num_peptides % 100000 == 0:
                         logging.info("Processed %d peptides", num_peptides)
 
             logging.info("Number of proteins: %d", num_proteins)
             logging.info("Number of peptides: %d", num_peptides)
-            logging.info("Number of unique peptides: %d", num_unique_peptides)
+            logging.info(
+                "Approximation of unique peptides: %d", num_unique_peptides_approx
+            )
             logging.info("Partitions: %d", num_partitions)
 
             od_peptides_per_mass = collections.OrderedDict(
@@ -81,7 +83,7 @@ class Partitioner:
             )
 
             partitions = self._get_partitions(
-                num_partitions, num_peptides, od_peptides_per_mass
+                num_partitions, num_unique_peptides_approx, od_peptides_per_mass
             )
 
             num_partitions = len(partitions)
